@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
+import { Link } from "react-router-dom";
 
 export default function Setup() {
     const [playerName, setPlayerName] = useState("");
@@ -35,7 +36,8 @@ export default function Setup() {
                     const players = playerNames.map(name => ({ 
                         name, 
                         marks: { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 }, 
-                        points: 0 
+                        points: 0,
+                        darts: { total: 0, singles: 0, doubles: 0, triples: 0 }
                     }));
                     dispatch({ type: "START_GAME", payload: players });
                     navigate("/game");
@@ -43,6 +45,8 @@ export default function Setup() {
             }}>
                 Start Game
             </button>
+            <br />
+            <Link to="/stats">View Stats</Link>
         </div>
         
     );

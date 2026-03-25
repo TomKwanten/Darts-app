@@ -36,7 +36,7 @@ export default function GameProvider({ children }) {
                     currentPlayerIndex: state.currentPlayerIndex,
                     currentTurn: state.currentTurn,
                     winner: state.winner,
-                }
+                };
 
                 const hits = countHits(state.currentTurn);
                 const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
@@ -45,21 +45,29 @@ export default function GameProvider({ children }) {
                     if (index !== state.currentPlayerIndex) return player;
                     const newMarks = applyMarks(player, hits);
                     const earnedPoints = calculatePoints(
-                        {...player, marks: newMarks }, 
-                        hits, 
-                        state.players, 
+                        { ...player, marks: newMarks },
+                        hits,
+                        state.players,
                         player.marks
                     );
+                    const newDarts = { ...player.darts };
+                    for (const dart of state.currentTurn) {
+                        newDarts.total += 1;
+                        if (dart.multiplier === 1) newDarts.singles += 1;
+                        if (dart.multiplier === 2) newDarts.doubles += 1;
+                        if (dart.multiplier === 3) newDarts.triples += 1;
+                    }
                     return {
                         ...player,
                         marks: newMarks,
                         points: player.points + earnedPoints,
+                        darts: newDarts,
                     };
                 });
 
                 const maxPoints = Math.max(...updatedPlayers.map(p => p.points));
-                const winner = updatedPlayers.find(player => {
-                const allClosed = Object.entries(player.marks).every(([number, marks]) => {
+                const winningPlayer = updatedPlayers.find(player => {
+                    const allClosed = Object.entries(player.marks).every(([number, marks]) => {
                         const maxMarks = parseInt(number) === 25 ? 2 : 3;
                         return marks === maxMarks;
                     });
@@ -71,7 +79,7 @@ export default function GameProvider({ children }) {
                     players: updatedPlayers,
                     currentPlayerIndex: nextPlayerIndex,
                     currentTurn: [],
-                    winner: winner ? winner.name : null,
+                    winner: winningPlayer ? { name: winningPlayer.name, finalPlayers: updatedPlayers } : null,
                     history: [...state.history, snapshot]
                 };
             }
