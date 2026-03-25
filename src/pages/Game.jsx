@@ -1,9 +1,9 @@
 import { useContext, useEffect } from "react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { GameContext } from "../context/GameContext";
+import { Link } from "react-router-dom";
 import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import { Link } from "react-router-dom";
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
@@ -13,7 +13,6 @@ export default function Game() {
 
     useEffect(() => {
         if (!winner) return;
-
         const gameSummary = {
             date: new Date().toISOString(),
             winner: winner.name,
@@ -23,34 +22,77 @@ export default function Game() {
                 darts: { ...player.darts }
             }))
         };
-
         setStats(prevStats => [...prevStats, gameSummary]);
     }, [winner]);
 
     if (players.length === 0) {
-        return <p>No game started. Go to setup first.</p>;
+        return (
+            <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
+                <p className="text-gray-500 text-sm uppercase tracking-widest">No game in progress</p>
+                <Link to="/"
+                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    ← Back to setup
+                </Link>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h1>Cricket</h1>
+        <div className="h-screen bg-gray-950 flex flex-col px-3 py-3 gap-2 overflow-hidden">
+
+            {/* Header */}
+            <div className="flex items-center justify-between flex-shrink-0">
+                <h1 className="text-lg font-black uppercase tracking-tight text-gray-100">
+                    Cricket
+                </h1>
+                <Link to="/stats"
+                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    Stats →
+                </Link>
+            </div>
+
+            {/* Winner banner */}
             {winner && (
-                <div style={{ background: "gold", padding: "16px" }}>
-                    <h2>{winner.name} wins!</h2>
-                    <button onClick={() => dispatch({ type: "RESET_GAME" })}>Play Again</button>
+                <div className="rounded-xl border p-3 text-center flex-shrink-0"
+                    style={{ borderColor: "#cc2200", backgroundColor: "#1a0500" }}>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Winner</p>
+                    <h2 className="text-2xl font-black uppercase tracking-tight"
+                        style={{ color: "#cc2200" }}>
+                        {winner.name}
+                    </h2>
+                    <button
+                        onClick={() => dispatch({ type: "RESET_GAME" })}
+                        className="mt-2 px-5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white"
+                        style={{ backgroundColor: "#cc2200" }}>
+                        Play Again
+                    </button>
                 </div>
             )}
-            <div style={{ display: "flex", gap: "16px" }}>
+
+            {/* Player cards — horizontal scroll for 5+ players */}
+            <div className="flex gap-2 flex-shrink-0 overflow-x-auto pb-1"
+                style={{ scrollSnapType: "x mandatory" }}>
                 {players.map((player, index) => (
-                    <PlayerCard
-                        key={player.name}
-                        player={player}
-                        isActive={index === currentPlayerIndex}
-                    />
+                    <div key={player.name}
+                        className="flex-shrink-0"
+                        style={{
+                            width: players.length <= 4
+                                ? `calc(${100 / players.length}% - ${(players.length - 1) * 8 / players.length}px)`
+                                : "calc(25% - 6px)",
+                            scrollSnapAlign: "start",
+                        }}>
+                        <PlayerCard
+                            player={player}
+                            isActive={index === currentPlayerIndex}
+                        />
+                    </div>
                 ))}
             </div>
-            <Numpad />
-            <Link to="/stats">View Stats</Link>
+
+            {/* Numpad — takes remaining space */}
+            <div className="flex-1 min-h-0">
+                <Numpad />
+            </div>
         </div>
     );
 }

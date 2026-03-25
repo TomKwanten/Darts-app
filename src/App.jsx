@@ -8,11 +8,13 @@ export default function App() {
     return (
         <GameProvider>
             <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Setup />} />
-                    <Route path="/game" element={<Game />} />
-                    <Route path="/stats" element={<Stats />} />
-                </Routes>
+                <div className="min-h-screen bg-gray-950 text-gray-100 font-sans">
+                    <Routes>
+                        <Route path="/" element={<Setup />} />
+                        <Route path="/game" element={<Game />} />
+                        <Route path="/stats" element={<Stats />} />
+                    </Routes>
+                </div>
             </BrowserRouter>
         </GameProvider>
     );
