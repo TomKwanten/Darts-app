@@ -1,16 +1,52 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
 import { Link } from "react-router-dom";
+import { getPlayers, createPlayer } from "../utils/api";
 
 const ACCENT_RED = "#cc2200";
 const BOARD_GREEN = "#1a4731";
 
 export default function Setup() {
     const [playerName, setPlayerName] = useState("");
-    const [playerNames, setPlayerNames] = useState([]);
+    const [allPlayers, setAllPlayers] = useState([]);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { dispatch } = useContext(GameContext);
+
+    useEffect(() => {
+        getPlayers()
+            .then(data => {
+                setAllPlayers(data);
+                setLoading(false);
+            })
+            .catch(() => {
+                setError("Could not load players.");
+                setLoading(false);
+            });
+    }, []);
+
+    function togglePlayer(id) {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    }
+
+    async function handleAddPlayer() {
+        const trimmed = playerName.trim();
+        if (trimmed === "") return;
+        try {
+            const newPlayer = await createPlayer(trimmed);
+            setAllPlayers(prev => [...prev, newPlayer]);
+            setPlayerName("");
+        } catch {
+            setError("Could not add player.");
+        }
+    }
+
+    const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
 
     return (
         <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4 py-12">
@@ -33,27 +69,22 @@ export default function Setup() {
                 {/* Input row */}
                 <div className="mb-5">
                     <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
-                        Player Name
+                        Add New Player
                     </label>
                     <div className="flex gap-2">
-                        <input 
-                            type="text" 
-                            value={playerName} 
-                            onChange={(e) => setPlayerName(e.target.value)} 
+                        <input
+                            type="text"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
                             placeholder="Enter name..."
                             className="flex-1 rounded-lg bg-gray-800 border border-gray-700 text-gray-100
-                                        px-3 py-2 text-sm placeholder-gray-600 
+                                        px-3 py-2 text-sm placeholder-gray-600
                                         focus:outline-none focus:border-gray-500"
                         />
-                        <button 
-                            onClick={() => {
-                                if (playerName.trim() !== "") {
-                                    setPlayerNames([...playerNames, playerName.trim()]);
-                                    setPlayerName("");
-                                }
-                            }}
+                        <button
+                            onClick={handleAddPlayer}
                             className="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
-                                        text-white transtion-all duration-150"
+                                        text-white transition-all duration-150"
                             style={{ backgroundColor: BOARD_GREEN }}
                         >
                             Add
@@ -61,23 +92,48 @@ export default function Setup() {
                     </div>
                 </div>
 
+                {/* Error message */}
+                {error && (
+                    <p className="text-xs text-red-400 mb-4">{error}</p>
+                )}
+
                 {/* Player list */}
-                <div className="mb-6 min-h-[80px]">
-                    {playerNames.length === 0 ? (
+                <div className="mb-6">
+                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                        Select Players
+                    </label>
+                    {loading ? (
                         <p className="text-xs text-gray-600 italic text-center pt-4">
-                            Add at least 2 players to start
+                            Loading players...
+                        </p>
+                    ) : allPlayers.length === 0 ? (
+                        <p className="text-xs text-gray-600 italic text-center pt-4">
+                            No players yet — add some above
                         </p>
                     ) : (
                         <ul className="space-y-2">
-                            {playerNames.map((name) => (
-                                <li key={name}
-                                    className="flex items-center gap-3 rounded-lg
-                                               bg-gray-800 border border-gray-700 px-3 py-2">
-                                    <span className="text-sm font-semibold text-gray-100">
-                                        {name}
-                                    </span>
-                                </li>
-                            ))}
+                            {allPlayers.map((player) => {
+                                const isSelected = selectedIds.includes(player.id);
+                                return (
+                                    <li key={player.id}
+                                        onClick={() => togglePlayer(player.id)}
+                                        className="flex items-center justify-between rounded-lg
+                                                   bg-gray-800 border px-3 py-2 cursor-pointer transition-colors duration-150"
+                                        style={{
+                                            borderColor: isSelected ? BOARD_GREEN : "#374151"
+                                        }}>
+                                        <span className="text-sm font-semibold text-gray-100">
+                                            {player.name}
+                                        </span>
+                                        {isSelected && (
+                                            <span className="text-xs font-bold uppercase tracking-wider"
+                                                style={{ color: BOARD_GREEN }}>
+                                                ✓ Playing
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
@@ -85,14 +141,15 @@ export default function Setup() {
                 {/* Start button */}
                 <button
                     onClick={() => {
-                        if (playerNames.length >= 2) {
-                            const players = playerNames.map(name => ({
-                                name,
+                        if (selectedPlayers.length >= 2) {
+                            const gamePlayers = selectedPlayers.map(player => ({
+                                id: player.id,
+                                name: player.name,
                                 marks: { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 },
                                 points: 0,
                                 darts: { total: 0, singles: 0, doubles: 0, triples: 0 }
                             }));
-                            dispatch({ type: "START_GAME", payload: players });
+                            dispatch({ type: "START_GAME", payload: gamePlayers });
                             navigate("/game");
                         }
                     }}

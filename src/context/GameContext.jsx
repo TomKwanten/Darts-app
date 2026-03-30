@@ -79,7 +79,7 @@ export default function GameProvider({ children }) {
                     players: updatedPlayers,
                     currentPlayerIndex: nextPlayerIndex,
                     currentTurn: [],
-                    winner: winningPlayer ? { name: winningPlayer.name, finalPlayers: updatedPlayers } : null,
+                    winner: winningPlayer ? { id: winningPlayer.id, name: winningPlayer.name, finalPlayers: updatedPlayers } : null,
                     history: [...state.history, snapshot]
                 };
             }

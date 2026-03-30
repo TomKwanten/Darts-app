@@ -1,28 +1,31 @@
 import { useContext, useEffect } from "react";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { GameContext } from "../context/GameContext";
 import { Link } from "react-router-dom";
 import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
+import { saveGame } from "../utils/api";
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
     const { players, currentPlayerIndex, winner } = gameState;
 
-    const [stats, setStats] = useLocalStorage("cricket-stats", []);
-
     useEffect(() => {
         if (!winner) return;
         const gameSummary = {
-            date: new Date().toISOString(),
-            winner: winner.name,
+            winner_id: winner.id,
             players: winner.finalPlayers.map(player => ({
-                name: player.name,
+                id: player.id,
                 points: player.points,
-                darts: { ...player.darts }
+                total_darts: player.darts.total,
+                singles: player.darts.singles,
+                doubles: player.darts.doubles,
+                triples: player.darts.triples,
             }))
         };
-        setStats(prevStats => [...prevStats, gameSummary]);
+        console.log("Saving game:", JSON.stringify(gameSummary, null, 2));
+        saveGame(gameSummary).catch(() => {
+            console.error("Failed to save game");
+        });
     }, [winner]);
 
     if (players.length === 0) {
