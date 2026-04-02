@@ -38,3 +38,13 @@ export async function deletePlayer(id) {
   });
   if (!response.ok) throw new Error('Failed to delete player');
 }
+
+export async function renamePlayer(id, name) {
+  const response = await fetch(`${BASE_URL}/players/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) throw new Error('Failed to rename player');
+  return response.json();
+}

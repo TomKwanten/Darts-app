@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
 import { Link } from "react-router-dom";
-import { getPlayers, createPlayer, deletePlayer } from "../utils/api";
+import { getPlayers, createPlayer, deletePlayer, renamePlayer } from "../utils/api";
 
 const ACCENT_RED = "#cc2200";
 const BOARD_GREEN = "#1a4731";
@@ -16,6 +16,8 @@ export default function Setup() {
     const [editMode, setEditMode] = useState(false);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [adding, setAdding] = useState(false);
+    const [renameId, setRenameId] = useState(null);
+    const [renameValue, setRenameValue] = useState("");
     const navigate = useNavigate();
     const { dispatch } = useContext(GameContext);
 
@@ -58,6 +60,19 @@ export default function Setup() {
             setSelectedIds(prev => prev.filter(i => i !== id));
         } catch {
             setError("Could not delete player.");
+        }
+    }
+
+    async function handleRenamePlayer(id) {
+        const trimmed = renameValue.trim();
+        if (trimmed === "") return;
+        try {
+            const updated = await renamePlayer(id, trimmed);
+            setAllPlayers(prev => prev.map(p => p.id === id ? updated : p));
+            setRenameId(null);
+            setRenameValue("");
+        } catch {
+            setError("Could not rename player.");
         }
     }
 
@@ -121,9 +136,14 @@ export default function Setup() {
                         </label>
                         {allPlayers.length > 0 && (
                             <button
-                                onClick={() => { setEditMode(prev => !prev); setConfirmDeleteId(null); }}
+                                onClick={() => { 
+                                    setEditMode(prev => !prev); 
+                                    setConfirmDeleteId(null); 
+                                    setRenameId(null); 
+                                    setRenameValue(""); 
+                                }}
                                 className="text-xs uppercase tracking-widest transition-colors duration-150"
-                                style={{ color: editMode ? BOARD_GREEN : "#4b5563" }}
+                                style={{ color: editMode ? "white" : "#4b5563" }}
                             >
                                 {editMode ? "Done" : "Edit"}
                             </button>
@@ -144,45 +164,83 @@ export default function Setup() {
                                 return (
                                     <li key={player.id}
                                         onClick={() => !editMode && togglePlayer(player.id)}
-                                        className="flex items-center justify-between rounded-lg
-                                                   bg-gray-800 border px-3 py-2 transition-colors duration-150"
+                                        className={`rounded-lg bg-gray-800 border px-3 py-2 transition-colors duration-150
+                                            ${renameId === player.id ? "flex flex-col gap-2" : "flex items-center justify-between"}`}
                                         style={{
                                             borderColor: isSelected && !editMode ? BOARD_GREEN : "#374151",
                                             cursor: editMode ? "default" : "pointer"
                                         }}>
-                                        <span className="text-sm font-semibold text-gray-100">
-                                            {player.name}
-                                        </span>
-                                        {editMode && (
-                                            confirmDeleteId === player.id ? (
-                                                <div className="flex items-center gap-2">
+                                        {renameId === player.id ? (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    value={renameValue}
+                                                    onChange={(e) => setRenameValue(e.target.value)}
+                                                    onKeyDown={(e) => { if (e.key === "Enter") handleRenamePlayer(player.id); }}
+                                                    className="w-full rounded bg-gray-700 border border-gray-600 text-gray-100
+                                                            px-2 py-1 text-sm focus:outline-none focus:border-gray-400"
+                                                    autoFocus
+                                                />
+                                                <div className="flex gap-3 justify-end">
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
-                                                        className="text-xs text-gray-500 hover:text-gray-300 px-1 transition-colors duration-150"
+                                                        onClick={(e) => { e.stopPropagation(); setRenameId(null); setRenameValue(""); }}
+                                                        className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
                                                     >
                                                         Cancel
                                                     </button>
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player.id); setConfirmDeleteId(null); }}
-                                                        className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                                        onClick={(e) => { e.stopPropagation(); handleRenamePlayer(player.id); }}
+                                                        className="text-xs font-black text-white hover:text-gray-300 transition-colors duration-150"
                                                     >
-                                                        Remove
+                                                        Save
                                                     </button>
                                                 </div>
-                                            ) : (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(player.id); }}
-                                                    className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
-                                                >
-                                                    ✕
-                                                </button>
-                                            )
-                                        )}
-                                        {!editMode && isSelected && (
-                                            <span className="text-xs font-bold uppercase tracking-wider"
-                                                style={{ color: BOARD_GREEN }}>
-                                                ✓ Playing
-                                            </span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-sm font-semibold text-gray-100">
+                                                    {player.name}
+                                                </span>
+                                                {editMode && (
+                                                    confirmDeleteId === player.id ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                                                                className="text-xs text-gray-500 hover:text-gray-300 px-1 transition-colors duration-150"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player.id); setConfirmDeleteId(null); }}
+                                                                className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setRenameId(player.id); setRenameValue(player.name); }}
+                                                                className="text-xs text-gray-500 hover:text-gray-300 px-1 transition-colors duration-150"
+                                                            >
+                                                                Rename
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(player.id); }}
+                                                                className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    )
+                                                )}
+                                                {!editMode && isSelected && (
+                                                    <span className="text-xs font-bold uppercase tracking-wider"
+                                                        style={{ color: BOARD_GREEN }}>
+                                                        ✓ Playing
+                                                    </span>
+                                                )}
+                                            </>
                                         )}
                                     </li>
                                 );
