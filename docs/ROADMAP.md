@@ -6,11 +6,12 @@
 - [x] Confirm before delete: "Are you sure?" step before removing a player
 - [x] Loading & error states: consistent feedback on every API call
 - [x] Rename player from the setup screen (`PATCH /api/players/{id}`)
+- [x] Delete a game from game history
 
 ## In Progress
 
 ## Up Next
-- [ ] Delete a game from game history
+
 
 ## Medium Term
 - [ ] Game-in-progress protection: warn when navigating away mid-game (React Router `useBlocker`)

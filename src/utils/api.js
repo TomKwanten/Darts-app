@@ -48,3 +48,10 @@ export async function renamePlayer(id, name) {
   if (!response.ok) throw new Error('Failed to rename player');
   return response.json();
 }
+
+export async function deleteGame(id) {
+  const response = await fetch(`${BASE_URL}/games/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete game');
+}

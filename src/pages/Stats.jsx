@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getGames } from "../utils/api";
+import { getGames, deleteGame } from "../utils/api";
 
 function calculateCareerStats(games) {
     const players = {};
     for (const game of games) {
+        if (!game.winner) continue; 
         for (const player of game.players) {
             if (!players[player.name]) {
                 players[player.name] = {
@@ -31,8 +32,9 @@ function calculateCareerStats(games) {
 
 export default function Stats() {
     const [games, setGames] = useState([]);
-    const [loading, setLoading] = useState(true);   // new
-    const [error, setError] = useState(null);        // new
+    const [loading, setLoading] = useState(true);   
+    const [error, setError] = useState(null);   
+    const [confirmDeleteGameId, setConfirmDeleteGameId] = useState(null);     
 
     useEffect(() => {
         getGames()
@@ -45,6 +47,16 @@ export default function Stats() {
                 setLoading(false);
             });
     }, []);
+
+    async function handleDeleteGame(id) {
+        try {
+            await deleteGame(id);
+            setGames(prev => prev.filter(g => g.id !== id));
+            setConfirmDeleteGameId(null);
+        } catch {
+            setError("Could not delete game.");
+        }
+    }
 
     // Loading state
     if (loading) {
@@ -160,14 +172,39 @@ export default function Stats() {
 
                             {/* Date + winner */}
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs text-gray-500">
-                                    {new Date(game.played_at).toLocaleDateString(undefined, {
-                                        day: "numeric", month: "short", year: "numeric"
-                                    })}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">
+                                        {new Date(game.played_at).toLocaleDateString(undefined, {
+                                            day: "numeric", month: "short", year: "numeric"
+                                        })}
+                                    </span>
+                                    {confirmDeleteGameId === game.id ? (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setConfirmDeleteGameId(null)}
+                                                className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteGame(game.id)}
+                                                className="text-xs font-black text-red-500 hover:text-red-400 transition-colors duration-150"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => setConfirmDeleteGameId(game.id)}
+                                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
                                 <span className="text-xs font-black uppercase tracking-wider"
                                     style={{ color: "#cc2200" }}>
-                                    🎯 {game.winner.name}
+                                    🎯 {game.winner?.name ?? "Unknown"}
                                 </span>
                             </div>
 
@@ -176,7 +213,7 @@ export default function Stats() {
                                 {game.players.map(player => (
                                     <div key={player.name}
                                         className="flex items-center justify-between text-xs">
-                                        <span className={player.name === game.winner.name
+                                        <span className={game.winner && player.name === game.winner.name
                                             ? "font-bold text-gray-100"
                                             : "text-gray-500"}>
                                             {player.name}
