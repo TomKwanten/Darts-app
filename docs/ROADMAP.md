@@ -3,11 +3,12 @@
 ## Done
 - [x] Stats page: wire up to `GET /api/games` endpoint
 - [x] Stats page: individual player stats (click player → see their history)
+- [x] Confirm before delete: "Are you sure?" step before removing a player
 
 ## In Progress
 
 ## Up Next
-- [ ] Confirm before delete: "Are you sure?" step before removing a player
+
 - [ ] Loading & error states: consistent feedback on every API call
 - [ ] Delete a game from game history
 - [ ] Rename player from the setup screen (`PATCH /api/players/{id}`)

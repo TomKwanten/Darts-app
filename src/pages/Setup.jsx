@@ -14,6 +14,7 @@ export default function Setup() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const navigate = useNavigate();
     const { dispatch } = useContext(GameContext);
 
@@ -116,7 +117,7 @@ export default function Setup() {
                         </label>
                         {allPlayers.length > 0 && (
                             <button
-                                onClick={() => setEditMode(prev => !prev)}
+                                onClick={() => { setEditMode(prev => !prev); setConfirmDeleteId(null); }}
                                 className="text-xs uppercase tracking-widest transition-colors duration-150"
                                 style={{ color: editMode ? BOARD_GREEN : "#4b5563" }}
                             >
@@ -148,20 +149,36 @@ export default function Setup() {
                                         <span className="text-sm font-semibold text-gray-100">
                                             {player.name}
                                         </span>
-                                        {editMode ? (
-                                            <button
-                                                onClick={() => handleDeletePlayer(player.id)}
-                                                className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
-                                            >
-                                                ✕
-                                            </button>
-                                        ) : (
-                                            isSelected && (
-                                                <span className="text-xs font-bold uppercase tracking-wider"
-                                                    style={{ color: BOARD_GREEN }}>
-                                                    ✓ Playing
-                                                </span>
+                                        {editMode && (
+                                            confirmDeleteId === player.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                                                        className="text-xs text-gray-500 hover:text-gray-300 px-1 transition-colors duration-150"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player.id); setConfirmDeleteId(null); }}
+                                                        className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(player.id); }}
+                                                    className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                                >
+                                                    ✕
+                                                </button>
                                             )
+                                        )}
+                                        {!editMode && isSelected && (
+                                            <span className="text-xs font-bold uppercase tracking-wider"
+                                                style={{ color: BOARD_GREEN }}>
+                                                ✓ Playing
+                                            </span>
                                         )}
                                     </li>
                                 );

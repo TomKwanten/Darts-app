@@ -154,7 +154,7 @@ export default function Stats() {
                     History
                 </div>
                 <div className="flex flex-col gap-2">
-                    {[...games].reverse().map((game) => (
+                    {games.map((game) => (
                         <div key={game.id}
                             className="rounded-xl border border-gray-800 bg-gray-900 p-3">
 
