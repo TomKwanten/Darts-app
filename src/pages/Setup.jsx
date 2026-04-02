@@ -103,9 +103,9 @@ export default function Setup() {
                         Select Players
                     </label>
                     {loading ? (
-                        <p className="text-xs text-gray-600 italic text-center pt-4">
-                            Loading players...
-                        </p>
+                        <div className="flex justify-center pt-4">
+                            <div className="w-6 h-6 border-2 border-gray-600 border-t-white rounded-full animate-spin" />
+                        </div>
                     ) : allPlayers.length === 0 ? (
                         <p className="text-xs text-gray-600 italic text-center pt-4">
                             No players yet — add some above

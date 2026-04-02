@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'http://192.168.0.209:8000/api';
 
 export async function getPlayers() {
   const response = await fetch(`${BASE_URL}/players`);
@@ -23,5 +23,11 @@ export async function saveGame(gameData) {
     body: JSON.stringify(gameData),
   });
   if (!response.ok) throw new Error('Failed to save game');
+  return response.json();
+}
+
+export async function getGames() {
+  const response = await fetch(`${BASE_URL}/games`);
+  if (!response.ok) throw new Error('Failed to fetch games');
   return response.json();
 }

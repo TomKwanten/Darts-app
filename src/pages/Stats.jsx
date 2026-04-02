@@ -1,9 +1,10 @@
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getGames } from "../utils/api";
 
-function calculateCareerStats(stats) {
+function calculateCareerStats(games) {
     const players = {};
-    for (const game of stats) {
+    for (const game of games) {
         for (const player of game.players) {
             if (!players[player.name]) {
                 players[player.name] = {
@@ -18,20 +19,57 @@ function calculateCareerStats(stats) {
             }
             const career = players[player.name];
             career.gamesPlayed += 1;
-            career.wins += game.winner === player.name ? 1 : 0;
-            career.totalDarts += player.darts.total;
-            career.singles += player.darts.singles;
-            career.doubles += player.darts.doubles;
-            career.triples += player.darts.triples;
+            career.wins += game.winner.name === player.name ? 1 : 0;
+            career.totalDarts += player.total_darts;
+            career.singles += player.singles;
+            career.doubles += player.doubles;
+            career.triples += player.triples;
         }
     }
     return Object.values(players).sort((a, b) => b.wins - a.wins);
 }
 
 export default function Stats() {
-    const [stats] = useLocalStorage("cricket-stats", []);
+    const [games, setGames] = useState([]);
+    const [loading, setLoading] = useState(true);   // new
+    const [error, setError] = useState(null);        // new
 
-    if (stats.length === 0) {
+    useEffect(() => {
+        getGames()
+            .then(data => {
+                setGames(data);
+                setLoading(false);
+            })
+            .catch(() => {
+                setError("Could not load stats.");
+                setLoading(false);
+            });
+    }, []);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-gray-600 border-t-white rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
+                <p className="text-red-400 text-sm uppercase tracking-widest">{error}</p>
+                <Link to="/"
+                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    ← Back to setup
+                </Link>
+            </div>
+        );
+    }
+
+    // Empty state — loading is done, but no games yet
+    if (games.length === 0) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
                 <p className="text-gray-500 text-sm uppercase tracking-widest">No games played yet</p>
@@ -43,7 +81,7 @@ export default function Stats() {
         );
     }
 
-    const careerStats = calculateCareerStats(stats);
+    const careerStats = calculateCareerStats(games);
 
     return (
         <div className="min-h-screen bg-gray-950 px-4 py-6">
@@ -116,20 +154,20 @@ export default function Stats() {
                     History
                 </div>
                 <div className="flex flex-col gap-2">
-                    {[...stats].reverse().map((game, index) => (
-                        <div key={index}
+                    {[...games].reverse().map((game) => (
+                        <div key={game.id}
                             className="rounded-xl border border-gray-800 bg-gray-900 p-3">
 
                             {/* Date + winner */}
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs text-gray-500">
-                                    {new Date(game.date).toLocaleDateString(undefined, {
+                                    {new Date(game.played_at).toLocaleDateString(undefined, {
                                         day: "numeric", month: "short", year: "numeric"
                                     })}
                                 </span>
                                 <span className="text-xs font-black uppercase tracking-wider"
                                     style={{ color: "#cc2200" }}>
-                                    🎯 {game.winner}
+                                    🎯 {game.winner.name}
                                 </span>
                             </div>
 
@@ -138,13 +176,13 @@ export default function Stats() {
                                 {game.players.map(player => (
                                     <div key={player.name}
                                         className="flex items-center justify-between text-xs">
-                                        <span className={player.name === game.winner
+                                        <span className={player.name === game.winner.name
                                             ? "font-bold text-gray-100"
                                             : "text-gray-500"}>
                                             {player.name}
                                         </span>
                                         <span className="tabular-nums text-gray-500">
-                                            {player.points}pts · {player.darts.total} darts
+                                            {player.points}pts · {player.total_darts} darts
                                         </span>
                                     </div>
                                 ))}
