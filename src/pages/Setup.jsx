@@ -15,6 +15,7 @@ export default function Setup() {
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [adding, setAdding] = useState(false);
     const navigate = useNavigate();
     const { dispatch } = useContext(GameContext);
 
@@ -45,6 +46,8 @@ export default function Setup() {
             setPlayerName("");
         } catch {
             setError("Could not add player.");
+        } finally {
+            setAdding(false);
         }
     }
 
@@ -95,11 +98,12 @@ export default function Setup() {
                         />
                         <button
                             onClick={handleAddPlayer}
+                            disabled={adding}
                             className="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
-                                        text-white transition-all duration-150"
+                                        text-white transition-all duration-150 disabled:opacity-50"
                             style={{ backgroundColor: BOARD_GREEN }}
                         >
-                            Add
+                            {adding ? "Adding..." : "Add"}
                         </button>
                     </div>
                 </div>

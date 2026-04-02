@@ -1,6 +1,6 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GameContext } from "../context/GameContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
 import { saveGame } from "../utils/api";
@@ -8,6 +8,8 @@ import { saveGame } from "../utils/api";
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
     const { players, currentPlayerIndex, winner } = gameState;
+    const [saveError, setSaveError] = useState(false);
+    const Navigate = useNavigate();
 
     useEffect(() => {
         if (!winner) return;
@@ -24,7 +26,7 @@ export default function Game() {
         };
         console.log("Saving game:", JSON.stringify(gameSummary, null, 2));
         saveGame(gameSummary).catch(() => {
-            console.error("Failed to save game");
+            setSaveError(true);
         });
     }, [winner]);
 
@@ -64,11 +66,16 @@ export default function Game() {
                         {winner.name}
                     </h2>
                     <button
-                        onClick={() => dispatch({ type: "RESET_GAME" })}
+                        onClick={() => { dispatch({ type: "RESET_GAME" }); setSaveError(false); Navigate("/"); }}
                         className="mt-2 px-5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white"
                         style={{ backgroundColor: "#cc2200" }}>
                         Play Again
                     </button>
+                    {saveError && (
+                        <p className="mt-2 text-xs uppercase tracking-widest text-red-400">
+                            Game could not be saved
+                        </p>
+                    )}
                 </div>
             )}
 
