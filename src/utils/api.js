@@ -31,3 +31,10 @@ export async function getGames() {
   if (!response.ok) throw new Error('Failed to fetch games');
   return response.json();
 }
+
+export async function deletePlayer(id) {
+  const response = await fetch(`${BASE_URL}/players/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete player');
+}

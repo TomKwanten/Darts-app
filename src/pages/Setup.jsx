@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
 import { Link } from "react-router-dom";
-import { getPlayers, createPlayer } from "../utils/api";
+import { getPlayers, createPlayer, deletePlayer } from "../utils/api";
 
 const ACCENT_RED = "#cc2200";
 const BOARD_GREEN = "#1a4731";
@@ -13,6 +13,7 @@ export default function Setup() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editMode, setEditMode] = useState(false);
     const navigate = useNavigate();
     const { dispatch } = useContext(GameContext);
 
@@ -43,6 +44,16 @@ export default function Setup() {
             setPlayerName("");
         } catch {
             setError("Could not add player.");
+        }
+    }
+
+    async function handleDeletePlayer(id) {
+        try {
+            await deletePlayer(id);
+            setAllPlayers(prev => prev.filter(p => p.id !== id));
+            setSelectedIds(prev => prev.filter(i => i !== id));
+        } catch {
+            setError("Could not delete player.");
         }
     }
 
@@ -99,9 +110,20 @@ export default function Setup() {
 
                 {/* Player list */}
                 <div className="mb-6">
-                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
-                        Select Players
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs uppercase tracking-widest text-gray-500">
+                            Select Players
+                        </label>
+                        {allPlayers.length > 0 && (
+                            <button
+                                onClick={() => setEditMode(prev => !prev)}
+                                className="text-xs uppercase tracking-widest transition-colors duration-150"
+                                style={{ color: editMode ? BOARD_GREEN : "#4b5563" }}
+                            >
+                                {editMode ? "Done" : "Edit"}
+                            </button>
+                        )}
+                    </div>
                     {loading ? (
                         <div className="flex justify-center pt-4">
                             <div className="w-6 h-6 border-2 border-gray-600 border-t-white rounded-full animate-spin" />
@@ -116,20 +138,30 @@ export default function Setup() {
                                 const isSelected = selectedIds.includes(player.id);
                                 return (
                                     <li key={player.id}
-                                        onClick={() => togglePlayer(player.id)}
+                                        onClick={() => !editMode && togglePlayer(player.id)}
                                         className="flex items-center justify-between rounded-lg
-                                                   bg-gray-800 border px-3 py-2 cursor-pointer transition-colors duration-150"
+                                                   bg-gray-800 border px-3 py-2 transition-colors duration-150"
                                         style={{
-                                            borderColor: isSelected ? BOARD_GREEN : "#374151"
+                                            borderColor: isSelected && !editMode ? BOARD_GREEN : "#374151",
+                                            cursor: editMode ? "default" : "pointer"
                                         }}>
                                         <span className="text-sm font-semibold text-gray-100">
                                             {player.name}
                                         </span>
-                                        {isSelected && (
-                                            <span className="text-xs font-bold uppercase tracking-wider"
-                                                style={{ color: BOARD_GREEN }}>
-                                                ✓ Playing
-                                            </span>
+                                        {editMode ? (
+                                            <button
+                                                onClick={() => handleDeletePlayer(player.id)}
+                                                className="text-xs font-black text-red-500 hover:text-red-400 px-1 transition-colors duration-150"
+                                            >
+                                                ✕
+                                            </button>
+                                        ) : (
+                                            isSelected && (
+                                                <span className="text-xs font-bold uppercase tracking-wider"
+                                                    style={{ color: BOARD_GREEN }}>
+                                                    ✓ Playing
+                                                </span>
+                                            )
                                         )}
                                     </li>
                                 );
