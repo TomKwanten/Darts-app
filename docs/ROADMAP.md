@@ -8,11 +8,12 @@
 - [x] Rename player from the setup screen (`PATCH /api/players/{id}`)
 - [x] Delete a game from game history
 - [x] Game-in-progress protection: warn when navigating away mid-game (React Router `useBlocker`)
+- [ ] PWA support: make app installable on phone home screen (`vite-plugin-pwa`)
 
 ## In Progress
 
 ## Up Next
-- [ ] PWA support: make app installable on phone home screen (`vite-plugin-pwa`)
+
 
 ## Bigger Lifts
 - [ ] Run app away from home / without localhost setup (hosting — Laravel on Railway/Fly.io, React on Netlify/Vercel)
