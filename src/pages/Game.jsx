@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { GameContext } from "../context/GameContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useBlocker } from "react-router-dom";
 import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
 import { saveGame } from "../utils/api";
@@ -10,6 +10,10 @@ export default function Game() {
     const { players, currentPlayerIndex, winner } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
+
+    const isGameInProgress = players.length > 0 && !winner;
+
+    const blocker = useBlocker(isGameInProgress);
 
     useEffect(() => {
         if (!winner) return;
@@ -44,6 +48,35 @@ export default function Game() {
 
     return (
         <div className="h-screen bg-gray-950 flex flex-col px-3 py-3 gap-2 overflow-hidden">
+
+            {/* Abandon game modal */}
+            {blocker.state === "blocked" && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+                    <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6 mx-6 flex flex-col gap-4 text-center">
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Game in progress</p>
+                        <h2 className="text-lg font-black uppercase tracking-tight text-gray-100">
+                            Abandon game?
+                        </h2>
+                        <p className="text-sm text-gray-400">This game will not be saved.</p>
+                        <div className="flex gap-3 mt-1">
+                            <button
+                                onClick={() => blocker.reset()}
+                                className="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors">
+                                Keep playing
+                            </button>
+                            <button
+                                onClick={() => {
+                                    dispatch({ type: "RESET_GAME" });
+                                    blocker.proceed();
+                                }}
+                                className="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest text-white transition-colors"
+                                style={{ backgroundColor: "#cc2200" }}>
+                                Abandon
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0">
