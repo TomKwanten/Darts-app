@@ -9,6 +9,7 @@ function calculateCareerStats(games) {
         for (const player of game.players) {
             if (!players[player.name]) {
                 players[player.name] = {
+                    id: player.id,
                     name: player.name,
                     gamesPlayed: 0,
                     wins: 0,
@@ -116,8 +117,9 @@ export default function Stats() {
                 </div>
                 <div className="flex flex-col gap-2">
                     {careerStats.map((player, index) => (
-                        <div key={player.name}
-                            className="rounded-xl border border-gray-800 bg-gray-900 p-3">
+                        <Link key={player.name}
+                            to={`/stats/players/${player.id}`}
+                            className="rounded-xl border border-gray-800 bg-gray-900 p-3 block active:opacity-70 transition-opacity">
 
                             {/* Name + win rate */}
                             <div className="flex items-center justify-between mb-2">
@@ -155,7 +157,7 @@ export default function Stats() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

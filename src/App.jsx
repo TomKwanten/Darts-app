@@ -3,11 +3,13 @@ import GameProvider from "./context/GameContext";
 import Setup from "./pages/Setup";
 import Game from "./pages/Game";
 import Stats from "./pages/Stats";
+import PlayerStats from "./pages/PlayerStats";
 
 const router = createBrowserRouter([
     { path: "/", element: <Setup /> },
     { path: "/game", element: <Game /> },
     { path: "/stats", element: <Stats /> },
+    { path: "/stats/players/:id", element: <PlayerStats /> },
 ]);
 
 export default function App() {
