@@ -8,7 +8,9 @@ const initialState = {
     currentPlayerIndex: 0,
     currentTurn: [],
     winner: null,
-    history: []
+    history: [],
+    turnNumber: 1,
+    turns: [],
 };
 
 export default function GameProvider({ children }) {
@@ -41,6 +43,8 @@ export default function GameProvider({ children }) {
                 const hits = countHits(state.currentTurn);
                 const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
 
+                let currentPlayerTurnData = null;
+
                 const updatedPlayers = state.players.map((player, index) => {
                     if (index !== state.currentPlayerIndex) return player;
                     const newMarks = applyMarks(player, hits);
@@ -57,6 +61,17 @@ export default function GameProvider({ children }) {
                         if (dart.multiplier === 2) newDarts.doubles += 1;
                         if (dart.multiplier === 3) newDarts.triples += 1;
                     }
+
+                    currentPlayerTurnData = {
+                        player_id: player.id,
+                        turn_number: state.turnNumber,
+                        points_scored: earnedPoints,
+                        running_total: player.points + earnedPoints,
+                        singles: newDarts.singles - player.darts.singles,
+                        doubles: newDarts.doubles - player.darts.doubles,
+                        triples: newDarts.triples - player.darts.triples,
+                    };
+
                     return {
                         ...player,
                         marks: newMarks,
@@ -80,7 +95,11 @@ export default function GameProvider({ children }) {
                     currentPlayerIndex: nextPlayerIndex,
                     currentTurn: [],
                     winner: winningPlayer ? { id: winningPlayer.id, name: winningPlayer.name, finalPlayers: updatedPlayers } : null,
-                    history: [...state.history, snapshot]
+                    history: [...state.history, snapshot],
+                    turnNumber: state.turnNumber + 1,
+                    turns: currentPlayerTurnData 
+                        ? [...state.turns, currentPlayerTurnData]
+                        : state.turns,
                 };
             }
             case "RESET_GAME":

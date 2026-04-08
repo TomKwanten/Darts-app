@@ -7,7 +7,7 @@ import { saveGame } from "../utils/api";
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner } = gameState;
+    const { players, currentPlayerIndex, winner, turns } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -26,7 +26,8 @@ export default function Game() {
                 singles: player.darts.singles,
                 doubles: player.darts.doubles,
                 triples: player.darts.triples,
-            }))
+            })),
+            turns: turns,
         };
         console.log("Saving game:", JSON.stringify(gameSummary, null, 2));
         saveGame(gameSummary).catch(() => {

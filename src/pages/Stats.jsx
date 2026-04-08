@@ -169,8 +169,10 @@ export default function Stats() {
                 </div>
                 <div className="flex flex-col gap-2">
                     {games.map((game) => (
-                        <div key={game.id}
-                            className="rounded-xl border border-gray-800 bg-gray-900 p-3">
+                        <Link key={game.id}
+                            to={`/stats/games/${game.id}`}
+                            state={{ game }}
+                            className="rounded-xl border border-gray-800 bg-gray-900 p-3 block">
 
                             {/* Date + winner */}
                             <div className="flex items-center justify-between mb-2">
@@ -183,13 +185,13 @@ export default function Stats() {
                                     {confirmDeleteGameId === game.id ? (
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => setConfirmDeleteGameId(null)}
+                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(null); }}
                                                 className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
                                             >
                                                 Cancel
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteGame(game.id)}
+                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteGame(game.id); }}
                                                 className="text-xs font-black text-red-500 hover:text-red-400 transition-colors duration-150"
                                             >
                                                 Remove
@@ -197,7 +199,7 @@ export default function Stats() {
                                         </div>
                                     ) : (
                                         <button
-                                            onClick={() => setConfirmDeleteGameId(game.id)}
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(game.id); }}
                                             className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
                                         >
                                             ✕
@@ -226,7 +228,7 @@ export default function Stats() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

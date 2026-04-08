@@ -6,6 +6,8 @@ function calculateCricketStats(games, playerId) {
     const playerGames = games.filter(g =>
         g.players.some(p => p.id === playerId)
     );
+    const lastGame = playerGames.sort(
+        (a, b) => new Date(b.played_at) - new Date(a.played_at))[0] ?? null;
 
     if (playerGames.length === 0) return null;
 
@@ -102,6 +104,11 @@ export default function PlayerStats() {
     }
 
     const stats = calculateCricketStats(games, playerId);
+
+    const playerGames = games.filter(g => g.players.some(p => p.id === playerId));
+    const lastGame = playerGames.sort((a, b) =>
+        new Date(b.played_at) - new Date(a.played_at)
+    )[0] ?? null;
 
     if (!stats) {
         return (
@@ -224,6 +231,49 @@ export default function PlayerStats() {
                 </div>
             )}
 
+            {/* Last Game */}
+            {lastGame && (
+                <div className="mt-4">
+                    <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                        Last Game
+                    </div>
+                    <Link
+                        to={`/stats/games/${lastGame.id}`}
+                        state={{ game: lastGame }}
+                        className="rounded-xl border border-gray-800 bg-gray-900 p-3 block active:opacity-70 transition-opacity">
+
+                        {/* Date + winner */}
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-gray-500">
+                                {new Date(lastGame.played_at).toLocaleDateString(undefined, {
+                                    day: "numeric", month: "short", year: "numeric"
+                                })}
+                            </span>
+                            <span className="text-xs font-black uppercase tracking-wider"
+                                style={{ color: "#cc2200" }}>
+                                🎯 {lastGame.winner?.name ?? "Unknown"}
+                            </span>
+                        </div>
+
+                        {/* Players */}
+                        <div className="flex flex-col gap-1">
+                            {lastGame.players.map(player => (
+                                <div key={player.id ?? player.name}
+                                    className="flex items-center justify-between text-xs">
+                                    <span className={lastGame.winner && player.name === lastGame.winner.name
+                                        ? "font-bold text-gray-100"
+                                        : "text-gray-500"}>
+                                        {player.name ?? "Unknown"}
+                                    </span>
+                                    <span className="tabular-nums text-gray-500">
+                                        {player.points}pts · {player.total_darts} darts
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }
