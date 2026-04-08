@@ -1,11 +1,15 @@
 import { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
-import { Link } from "react-router-dom";
 import { getPlayers, createPlayer, deletePlayer, renamePlayer } from "../utils/api";
 
 const ACCENT_RED = "#cc2200";
 const BOARD_GREEN = "#1a4731";
+
+const MODE_LABELS = {
+    cricket: "Cricket",
+    "501": "501",
+};
 
 export default function Setup() {
     const [playerName, setPlayerName] = useState("");
@@ -18,8 +22,17 @@ export default function Setup() {
     const [adding, setAdding] = useState(false);
     const [renameId, setRenameId] = useState(null);
     const [renameValue, setRenameValue] = useState("");
+    const [finishMultiplier, setFinishMultiplier] = useState(2);
+
     const navigate = useNavigate();
+    const location = useLocation();
+    const gameMode = location.state?.gameMode;
     const { dispatch } = useContext(GameContext);
+
+    // Redirect to home if no game mode was passed
+    useEffect(() => {
+        if (!gameMode) navigate("/", { replace: true });
+    }, [gameMode, navigate]);
 
     useEffect(() => {
         getPlayers()
@@ -76,7 +89,34 @@ export default function Setup() {
         }
     }
 
-    const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
+    function handleStartGame() {
+        const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
+        if (selectedPlayers.length < 2) return;
+
+        const gamePlayers = selectedPlayers.map(player => {
+            if (gameMode === "501") {
+                return {
+                    id: player.id,
+                    name: player.name,
+                    score: 501,
+                    darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+                };
+            }
+            return {
+                id: player.id,
+                name: player.name,
+                marks: { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 },
+                points: 0,
+                darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+            };
+        });
+
+        dispatch({
+            type: "START_GAME",
+            payload: { players: gamePlayers, gameMode, finishMultiplier },
+        });
+        navigate("/game");
+    }
 
     return (
         <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4 py-12">
@@ -87,7 +127,7 @@ export default function Setup() {
                     START
                 </div>
                 <h1 className="text-6xl font-black uppercase tracking-tight text-gray-100">
-                    Cricket
+                    {MODE_LABELS[gameMode] ?? "Darts"}
                 </h1>
                 <div className="mt-2 h-1 w-16 mx-auto rounded-full"
                     style={{ backgroundColor: ACCENT_RED }} />
@@ -108,14 +148,14 @@ export default function Setup() {
                             onChange={(e) => setPlayerName(e.target.value)}
                             placeholder="Enter name..."
                             className="flex-1 rounded-lg bg-gray-800 border border-gray-700 text-gray-100
-                                        px-3 py-2 text-sm placeholder-gray-600
-                                        focus:outline-none focus:border-gray-500"
+                                       px-3 py-2 text-sm placeholder-gray-600
+                                       focus:outline-none focus:border-gray-500"
                         />
                         <button
                             onClick={handleAddPlayer}
                             disabled={adding}
                             className="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
-                                        text-white transition-all duration-150 disabled:opacity-50"
+                                       text-white transition-all duration-150 disabled:opacity-50"
                             style={{ backgroundColor: BOARD_GREEN }}
                         >
                             {adding ? "Adding..." : "Add"}
@@ -136,11 +176,11 @@ export default function Setup() {
                         </label>
                         {allPlayers.length > 0 && (
                             <button
-                                onClick={() => { 
-                                    setEditMode(prev => !prev); 
-                                    setConfirmDeleteId(null); 
-                                    setRenameId(null); 
-                                    setRenameValue(""); 
+                                onClick={() => {
+                                    setEditMode(prev => !prev);
+                                    setConfirmDeleteId(null);
+                                    setRenameId(null);
+                                    setRenameValue("");
                                 }}
                                 className="text-xs uppercase tracking-widest transition-colors duration-150"
                                 style={{ color: editMode ? "white" : "#4b5563" }}
@@ -178,7 +218,7 @@ export default function Setup() {
                                                     onChange={(e) => setRenameValue(e.target.value)}
                                                     onKeyDown={(e) => { if (e.key === "Enter") handleRenamePlayer(player.id); }}
                                                     className="w-full rounded bg-gray-700 border border-gray-600 text-gray-100
-                                                            px-2 py-1 text-sm focus:outline-none focus:border-gray-400"
+                                                               px-2 py-1 text-sm focus:outline-none focus:border-gray-400"
                                                     autoFocus
                                                 />
                                                 <div className="flex gap-3 justify-end">
@@ -249,21 +289,44 @@ export default function Setup() {
                     )}
                 </div>
 
+                {/* 501 finish option */}
+                {gameMode === "501" && (
+                    <div className="mb-6">
+                        <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                            Finish On
+                        </label>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setFinishMultiplier(2)}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: finishMultiplier === 2 ? BOARD_GREEN : "transparent",
+                                    borderColor: finishMultiplier === 2 ? BOARD_GREEN : "#374151",
+                                    color: finishMultiplier === 2 ? "white" : "#6b7280",
+                                }}
+                            >
+                                Double
+                            </button>
+                            <button
+                                onClick={() => setFinishMultiplier(3)}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: finishMultiplier === 3 ? BOARD_GREEN : "transparent",
+                                    borderColor: finishMultiplier === 3 ? BOARD_GREEN : "#374151",
+                                    color: finishMultiplier === 3 ? "white" : "#6b7280",
+                                }}
+                            >
+                                Triple
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Start button */}
                 <button
-                    onClick={() => {
-                        if (selectedPlayers.length >= 2) {
-                            const gamePlayers = selectedPlayers.map(player => ({
-                                id: player.id,
-                                name: player.name,
-                                marks: { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 },
-                                points: 0,
-                                darts: { total: 0, singles: 0, doubles: 0, triples: 0 }
-                            }));
-                            dispatch({ type: "START_GAME", payload: gamePlayers });
-                            navigate("/game");
-                        }
-                    }}
+                    onClick={handleStartGame}
                     className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-[0.15em]
                                text-white transition-all duration-200"
                     style={{ backgroundColor: ACCENT_RED }}>
@@ -271,11 +334,11 @@ export default function Setup() {
                 </button>
             </div>
 
-            {/* Footer link */}
-            <Link to="/stats"
+            {/* Back link */}
+            <Link to="/"
                 className="mt-8 text-xs uppercase tracking-widest text-gray-600
                            hover:text-gray-400 transition-colors duration-150">
-                View Stats →
+                ← Back
             </Link>
         </div>
     );

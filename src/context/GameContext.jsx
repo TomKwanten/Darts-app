@@ -5,6 +5,8 @@ export const GameContext = createContext();
 
 const initialState = {
     players: [],
+    gameMode: null,
+    finishMultiplier: 2,
     currentPlayerIndex: 0,
     currentTurn: [],
     winner: null,
@@ -18,7 +20,12 @@ export default function GameProvider({ children }) {
         console.log("action:", action.type, action.payload);
         switch (action.type) {
             case "START_GAME":
-                return { ...state, players: action.payload };
+                return { 
+                    ...state, 
+                    players: action.payload,
+                    gameMode: action.payload.gameMode,
+                    finishMultiplier: action.payload.finishMultiplier,
+                };
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };
             case "UNDO_DART":
