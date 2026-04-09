@@ -23,6 +23,11 @@ export default function Numpad() {
         dispatch({ type: "ADD_DART", payload: { number, multiplier } });
     }
 
+    function handleMiss() {
+        if (turnFull) return;
+        dispatch({ type: "ADD_DART", payload: { number: 0, multiplier: 1 } });
+    }
+
     return (
         <div className="h-full flex flex-col rounded-2xl border border-gray-800 bg-gray-900 p-2 gap-1">
 
@@ -82,6 +87,18 @@ export default function Numpad() {
                         })}
                     </div>
                 ))}
+            </div>
+
+            {/* Miss button */}
+            <div className="flex-shrink-0 pt-1">
+                <button
+                    onClick={handleMiss}
+                    disabled={turnFull}
+                    className="w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider
+                               transition-all duration-150 active:scale-95 disabled:opacity-25"
+                    style={{ backgroundColor: "#1f2937", color: "#6b7280" }}>
+                    Miss
+                </button>
             </div>
 
             {/* Undo + Submit */}

@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, Legend, ResponsiveContainer
@@ -13,11 +13,53 @@ const PLAYER_COLOURS = [
     "#ec4899",
 ];
 
+const SCORE_BANDS = [
+    { label: "180",  min: 180, max: 180 },
+    { label: "160+", min: 160, max: 179 },
+    { label: "140+", min: 140, max: 159 },
+    { label: "120+", min: 120, max: 139 },
+    { label: "100+", min: 100, max: 119 },
+    { label: "80+",  min: 80,  max: 99  },
+    { label: "60+",  min: 60,  max: 79  },
+    { label: "40+",  min: 40,  max: 59  },
+    { label: "1–39", min: 1,   max: 39  },
+];
+
+function computePlayerStats(player, turns, winnerId) {
+    const playerTurns = turns.filter(t => t.player_id === player.id);
+    const turnCount = playerTurns.length;
+
+    const totalPoints = playerTurns.reduce((sum, t) => sum + (t.points_scored ?? 0), 0);
+    const avg = turnCount > 0 ? (totalPoints / turnCount).toFixed(1) : "—";
+
+    const high = turnCount > 0
+        ? Math.max(...playerTurns.map(t => t.points_scored ?? 0))
+        : "—";
+
+    const busts = playerTurns.filter(t => (t.points_scored ?? 0) === 0).length;
+
+    const checkoutTurn = playerTurns.find(t => t.running_total === 0);
+    const checkout = checkoutTurn ? checkoutTurn.points_scored : "—";
+
+    const bandCounts = SCORE_BANDS.map(band => ({
+        label: band.label,
+        count: playerTurns.filter(t => {
+            const s = t.points_scored ?? 0;
+            return s >= band.min && s <= band.max;
+        }).length,
+    }));
+
+    return { turnCount, avg, high, busts, checkout, bandCounts };
+}
+
+const GAME_MODE_LABEL = {
+    cricket: "Cricket",
+    "501": "501",
+};
+
 export default function GameDetail() {
     const { state } = useLocation();
-    const navigate = useNavigate();
 
-    // Guard: navigated here directly without state
     if (!state?.game) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
@@ -32,8 +74,9 @@ export default function GameDetail() {
 
     const { game } = state;
     const hasTurns = Array.isArray(game.turns) && game.turns.length > 0;
+    const is501 = game.game_mode === "501";
 
-    // Build chart data: one object per turn_number, with each player's running_total
+    // Chart data
     const chartData = hasTurns ? (() => {
         const maxTurn = Math.max(...game.turns.map(t => t.turn_number));
         return Array.from({ length: maxTurn }, (_, i) => {
@@ -49,6 +92,13 @@ export default function GameDetail() {
         });
     })() : [];
 
+    const playerStats = (hasTurns && is501)
+        ? game.players.map(player => ({
+            player,
+            ...computePlayerStats(player, game.turns, game.winner?.id),
+        }))
+        : [];
+
     return (
         <div className="min-h-screen bg-gray-950 px-4 py-6">
 
@@ -56,7 +106,7 @@ export default function GameDetail() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-black uppercase tracking-tight text-gray-100">
-                        Game Detail
+                        {GAME_MODE_LABEL[game.game_mode] ?? game.game_mode}
                     </h1>
                     <p className="text-xs text-gray-500 mt-1">
                         {new Date(game.played_at).toLocaleDateString(undefined, {
@@ -137,7 +187,7 @@ export default function GameDetail() {
                 </div>
             </div>
 
-            {/* Score progression chart — hidden for old games without turns */}
+            {/* Score progression chart */}
             {hasTurns && (
                 <div className="mb-8">
                     <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
@@ -156,8 +206,7 @@ export default function GameDetail() {
                                     contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151", borderRadius: 8 }}
                                     labelStyle={{ color: "#9ca3af", fontSize: 11 }}
                                     itemStyle={{ fontSize: 11 }} />
-                                <Legend
-                                    wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                                 {game.players.map((player, index) => (
                                     <Line
                                         key={player.id ?? player.name}
@@ -176,50 +225,111 @@ export default function GameDetail() {
                 </div>
             )}
 
-            {/* Turn-by-turn table — hidden for old games without turns */}
-            {hasTurns && (
-                <div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
-                        Turn by Turn
+            {/* 501-only: Key Stats + Score Bands */}
+            {hasTurns && is501 && (
+                <>
+                    {/* Key Stats */}
+                    <div className="mb-8">
+                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                            Key Stats
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            {playerStats.map(({ player, avg, high, busts, checkout }, index) => {
+                                const colour = PLAYER_COLOURS[index % PLAYER_COLOURS.length];
+                                const isWinner = game.winner && player.id === game.winner.id;
+                                return (
+                                    <div key={player.id ?? player.name}
+                                        className="rounded-xl border border-gray-800 bg-gray-900 p-3">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="w-2 h-2 rounded-full inline-block"
+                                                style={{ backgroundColor: colour }} />
+                                            <span className="text-sm font-black uppercase tracking-wide text-gray-100">
+                                                {player.name ?? "Unknown"}
+                                            </span>
+                                            {isWinner && (
+                                                <span className="text-xs font-black uppercase tracking-wider"
+                                                    style={{ color: "#cc2200" }}>
+                                                    🎯
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-1 text-center">
+                                            {[
+                                                { label: "Avg", value: avg },
+                                                { label: "High", value: high },
+                                                { label: "Busts", value: busts },
+                                                { label: "Checkout", value: checkout },
+                                            ].map(({ label, value }) => (
+                                                <div key={label} className="rounded-lg bg-gray-800 py-1 px-1">
+                                                    <div className="text-sm font-black tabular-nums text-gray-100">
+                                                        {value}
+                                                    </div>
+                                                    <div className="text-[9px] uppercase tracking-wider text-gray-500 mt-[1px]">
+                                                        {label}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                    <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden">
-                        <table className="w-full text-xs">
-                            <thead>
-                                <tr className="border-b border-gray-800">
-                                    <th className="text-left px-3 py-2 text-gray-500 font-normal uppercase tracking-wider">
-                                        Turn
-                                    </th>
-                                    {game.players.map((player, index) => (
-                                        <th key={player.id ?? player.name}
-                                            className="text-right px-3 py-2 font-black uppercase tracking-wider"
-                                            style={{ color: PLAYER_COLOURS[index % PLAYER_COLOURS.length] }}>
-                                            {player.name ?? "Unknown"}
+
+                    {/* Score Bands */}
+                    <div className="mb-8">
+                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                            Score Bands
+                        </div>
+                        <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden">
+                            <table className="w-full text-xs">
+                                <thead>
+                                    <tr className="border-b border-gray-700">
+                                        <th className="text-left px-3 py-2 text-gray-600 font-normal uppercase tracking-wider">
+                                            Score
                                         </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {chartData.map((row, i) => (
-                                    <tr key={row.turn}
-                                        className={i % 2 === 0 ? "bg-gray-900" : "bg-gray-800/40"}>
-                                        <td className="px-3 py-2 tabular-nums text-gray-500">
-                                            {row.turn}
-                                        </td>
-                                        {game.players.map((player) => {
-                                            const name = player.name ?? "Unknown";
-                                            return (
-                                                <td key={player.id ?? name}
-                                                    className="px-3 py-2 tabular-nums text-right text-gray-100">
-                                                    {row[name] ?? "—"}
-                                                </td>
-                                            );
-                                        })}
+                                        {playerStats.map(({ player, turnCount }, index) => (
+                                            <th key={player.id ?? player.name}
+                                                className="text-center px-3 py-2 font-black uppercase tracking-wider"
+                                                style={{ color: PLAYER_COLOURS[index % PLAYER_COLOURS.length] }}>
+                                                <div>{player.name ?? "Unknown"}</div>
+                                                <div className="text-lg font-black tabular-nums text-gray-100 leading-tight">
+                                                    {turnCount}
+                                                </div>
+                                                <div className="text-[9px] font-normal text-gray-500 uppercase tracking-wider">
+                                                    turns
+                                                </div>
+                                            </th>
+                                        ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {SCORE_BANDS.map((band, bandIndex) => (
+                                        <tr key={band.label}
+                                            className={bandIndex % 2 === 0 ? "bg-gray-900" : "bg-gray-800/40"}>
+                                            <td className="px-3 py-2">
+                                                <span className="inline-block bg-gray-700/60 text-gray-300 text-[10px] font-black uppercase tracking-wider rounded-lg px-2 py-1">
+                                                    {band.label}
+                                                </span>
+                                            </td>
+                                            {playerStats.map(({ player, bandCounts }, index) => {
+                                                const count = bandCounts.find(b => b.label === band.label)?.count ?? 0;
+                                                return (
+                                                    <td key={player.id ?? player.name}
+                                                        className="text-center px-3 py-2 tabular-nums font-black text-gray-100">
+                                                        {count > 0 ? count : (
+                                                            <span className="text-gray-600">0</span>
+                                                        )}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
