@@ -1,4 +1,6 @@
 const BASE_URL = 'http://192.168.0.209:8000/api';
+// const BASE_URL = 'http://192.168.137.1:8000/api';
+// const BASE_URL = 'http://localhost:8000/api';
 
 export async function getPlayers() {
   const response = await fetch(`${BASE_URL}/players`);

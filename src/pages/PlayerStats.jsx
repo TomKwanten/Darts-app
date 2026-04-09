@@ -4,7 +4,7 @@ import { getGames } from "../utils/api";
 
 function calculateCricketStats(games, playerId) {
     const playerGames = games.filter(g =>
-        g.players.some(p => p.id === playerId)
+        g.game_mode === "cricket" && g.players.some(p => p.id === playerId)
     );
     const lastGame = playerGames.sort(
         (a, b) => new Date(b.played_at) - new Date(a.played_at))[0] ?? null;
@@ -142,6 +142,7 @@ export default function PlayerStats() {
                     className="bg-gray-900 border border-gray-700 text-gray-100 text-xs uppercase tracking-widest rounded-lg px-3 py-2 focus:outline-none focus:border-gray-500"
                 >
                     <option value="cricket">Cricket</option>
+                    <option value="501">501</option>
                     <option value="overall">Overall</option>
                 </select>
             </div>
@@ -222,6 +223,12 @@ export default function PlayerStats() {
                         </div>
                     </div>
 
+                </div>
+            )}
+
+            {gameMode === "501" && (
+                <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+                    <p className="text-gray-500 text-sm">501 stats coming soon.</p>
                 </div>
             )}
 

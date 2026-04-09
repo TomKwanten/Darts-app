@@ -30,50 +30,63 @@ function renderMarks(count, number) {
     );
 }
 
-export default function PlayerCard({ player, isActive }) {
+export default function PlayerCard({ player, isActive, gameMode }) {
     return (
-        <div
-            className="flex-1 rounded-xl border bg-gray-900 p-2 transition-all duration-300"
+        <div className="flex-1 rounded-xl border bg-gray-900 p-2 transition-all duration-300"
             style={{
                 borderColor: isActive ? "#cc2200" : "#1f2937",
                 boxShadow: isActive ? "0 0 16px #cc220044" : "none",
             }}>
 
-            {/* Name + points */}
+            {/* Name + points (Cricket only) */}
             <div className="flex items-center justify-between mb-1 px-1">
                 <span className="text-sm font-black uppercase tracking-wide text-gray-100 truncate">
                     {player.name}
                 </span>
-                <span className="text-sm font-black tabular-nums" style={{ color: "#cc2200" }}>
-                    {player.points}
-                </span>
+                {gameMode === "cricket" && (
+                    <span className="text-sm font-black tabular-nums" style={{ color: "#cc2200" }}>
+                        {player.points}
+                    </span>
+                )}
             </div>
 
             {/* Active bar */}
             <div className="mb-2 h-[2px] rounded-full"
                 style={{ backgroundColor: isActive ? "#cc2200" : "#1f2937" }} />
 
-            {/* Marks — one row per number, very compact */}
-            <div className="flex flex-col gap-[2px]">
-                {NUMBERS.map((number) => {
-                    const isBull = number === 25;
-                    const maxMarks = isBull ? 2 : 3;
-                    const closed = player.marks[number] === maxMarks;
-                    return (
-                        <div key={number}
-                            className="flex items-center justify-between px-1 py-[2px] rounded"
-                            style={{ backgroundColor: closed ? "#0d0d0d" : "transparent" }}>
-                            <span className="text-xs font-bold tabular-nums w-6 text-right"
-                                style={{ color: closed ? "#374151" : "#9ca3af" }}>
-                                {isBull ? "B" : number}
-                            </span>
-                            <div className="flex items-center justify-end w-10">
-                                {renderMarks(player.marks[number], number)}
+            {/* Cricket: marks grid */}
+            {gameMode === "cricket" && (
+                <div className="flex flex-col gap-[2px]">
+                    {NUMBERS.map((number) => {
+                        const isBull = number === 25;
+                        const maxMarks = isBull ? 2 : 3;
+                        const closed = player.marks[number] === maxMarks;
+                        return (
+                            <div key={number}
+                                className="flex items-center justify-between px-1 py-[2px] rounded"
+                                style={{ backgroundColor: closed ? "#0d0d0d" : "transparent" }}>
+                                <span className="text-xs font-bold tabular-nums w-6 text-right"
+                                    style={{ color: closed ? "#374151" : "#9ca3af" }}>
+                                    {isBull ? "B" : number}
+                                </span>
+                                <div className="flex items-center justify-end w-10">
+                                    {renderMarks(player.marks[number], number)}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* 501: remaining score */}
+            {gameMode === "501" && (
+                <div className="flex items-center justify-center py-2">
+                    <span className="text-3xl font-black tabular-nums"
+                        style={{ color: isActive ? "#cc2200" : "#9ca3af" }}>
+                        {player.score}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

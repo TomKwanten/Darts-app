@@ -7,7 +7,7 @@ import { saveGame } from "../utils/api";
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -19,9 +19,10 @@ export default function Game() {
         if (!winner) return;
         const gameSummary = {
             winner_id: winner.id,
+            game_mode: gameMode,
             players: winner.finalPlayers.map(player => ({
                 id: player.id,
-                points: player.points,
+                points: gameMode === "501" ? (501 - player.score) : player.points,
                 total_darts: player.darts.total,
                 singles: player.darts.singles,
                 doubles: player.darts.doubles,
@@ -82,7 +83,7 @@ export default function Game() {
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0">
                 <h1 className="text-lg font-black uppercase tracking-tight text-gray-100">
-                    Cricket
+                    {gameMode === "501" ? "501" : "Cricket"}
                 </h1>
                 <Link to="/stats"
                     className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
@@ -128,6 +129,7 @@ export default function Game() {
                         <PlayerCard
                             player={player}
                             isActive={index === currentPlayerIndex}
+                            gameMode={gameMode}
                         />
                     </div>
                 ))}
