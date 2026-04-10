@@ -105,14 +105,14 @@ export default function Stats() {
                     Stats
                 </h1>
                 <Link to="/"
-                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
                     ← Setup
                 </Link>
             </div>
 
             {/* Career stats */}
             <div className="mb-8">
-                <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                     Career
                 </div>
                 <div className="flex flex-col gap-2">
@@ -124,7 +124,7 @@ export default function Stats() {
                             {/* Name + win rate */}
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-black tabular-nums w-4"
+                                    <span className="text-sm font-black tabular-nums w-4"
                                         style={{ color: index === 0 ? "#d4a017" : "#4b5563" }}>
                                         {index + 1}
                                     </span>
@@ -132,7 +132,7 @@ export default function Stats() {
                                         {player.name}
                                     </span>
                                 </div>
-                                <span className="text-xs font-bold tabular-nums"
+                                <span className="text-sm font-bold tabular-nums"
                                     style={{ color: "#cc2200" }}>
                                     {player.wins}W — {player.gamesPlayed - player.wins}L
                                 </span>
@@ -164,7 +164,7 @@ export default function Stats() {
 
             {/* Game history */}
             <div>
-                <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                     History
                 </div>
                 <div className="flex flex-col gap-2">
@@ -206,7 +206,7 @@ export default function Stats() {
                                         </button>
                                     )}
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-wider"
+                                <span className="text-sm font-black uppercase tracking-wider"
                                     style={{ color: "#cc2200" }}>
                                     🎯 {game.winner?.name ?? "Unknown"}
                                 </span>

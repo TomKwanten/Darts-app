@@ -207,7 +207,7 @@ export default function Setup() {
                                         className={`rounded-lg bg-gray-800 border px-3 py-2 transition-colors duration-150
                                             ${renameId === player.id ? "flex flex-col gap-2" : "flex items-center justify-between"}`}
                                         style={{
-                                            borderColor: isSelected && !editMode ? BOARD_GREEN : "#374151",
+                                            borderColor: isSelected && !editMode ? "#22c55e" : "#374151",
                                             cursor: editMode ? "default" : "pointer"
                                         }}>
                                         {renameId === player.id ? (
@@ -275,8 +275,8 @@ export default function Setup() {
                                                     )
                                                 )}
                                                 {!editMode && isSelected && (
-                                                    <span className="text-xs font-bold uppercase tracking-wider"
-                                                        style={{ color: BOARD_GREEN }}>
+                                                    <span className="text-xs font-black uppercase tracking-wider"
+                                                        style={{ color: "#22c55e" }}>
                                                         ✓ Playing
                                                     </span>
                                                 )}

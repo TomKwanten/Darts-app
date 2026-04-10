@@ -19,13 +19,23 @@
       - Per-player stat cards
 - [x] Player names in game detail page link to their career stats
 - [x] Last Game card on player detail page links to game detail page
+- [x] 501 game mode — fully working end-to-end
+      - 501 logic (bust detection, finish multiplier: Double/Triple)
+      - Game screen with numpad, miss button, undo across turn boundaries
+      - Game detail page: key stats (avg, high, busts, checkout), score bands
+- [x] Miss button — allows submitting a scoreless turn in any game mode
+- [x] Player detail page — 501 stats block
+      - W/L record, avg per turn (excl. busts), avg darts/win
+      - Checkout count + checkout rate
+      - Best game (fewest darts to win)
+- [x] Bug fix: 501-only players no longer hit blank screen on player detail page
 
 ## Up Next
+- [ ] Small UI improvements
 - [ ] Overall stats section on player detail page
 - [ ] Per-gamemode stats filtering on main Stats page
 
 ## Up Next (Game Modes)
-- [ ] 501 game mode
 - [ ] Around the Clock game mode
 
 ## Future Game Modes

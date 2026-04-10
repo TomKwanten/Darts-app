@@ -182,7 +182,7 @@ export default function PlayerStats() {
                 <h1 className="text-2xl font-black uppercase tracking-tight text-gray-100">
                     {stats?.playerName ?? lastGame?.players.find(p => p.id === playerId)?.name ?? "Player"}
                 </h1>
-                <Link to="/stats" className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                <Link to="/stats" className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
                     ← Stats
                 </Link>
             </div>
@@ -192,7 +192,7 @@ export default function PlayerStats() {
                 <select
                     value={gameMode}
                     onChange={e => setGameMode(e.target.value)}
-                    className="bg-gray-900 border border-gray-700 text-gray-100 text-xs uppercase tracking-widest rounded-lg px-3 py-2 focus:outline-none focus:border-gray-500"
+                    className="bg-gray-900 border border-gray-700 text-gray-100 text-sm uppercase tracking-widest rounded-lg px-3 py-2 focus:outline-none focus:border-gray-500"
                 >
                     <option value="cricket">Cricket</option>
                     <option value="501">501</option>
@@ -210,7 +210,7 @@ export default function PlayerStats() {
                 <div className="flex flex-col gap-4">
                     {/* W/L */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Record</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Record</div>
                         <div className="flex gap-4">
                             <div className="flex-1 text-center rounded-lg bg-gray-800 py-3">
                                 <div className="text-2xl font-black" style={{ color: "#cc2200" }}>{stats.wins}</div>
@@ -229,7 +229,7 @@ export default function PlayerStats() {
 
                     {/* Averages */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Averages</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Averages</div>
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: "Darts / game", value: stats.dartAvgPerGame.toFixed(1) },
@@ -248,7 +248,7 @@ export default function PlayerStats() {
 
                     {/* Doubles & Triples */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Doubles & Triples</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Doubles & Triples</div>
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: "Doubles", value: stats.totalDoubles, pct: stats.doublesPercent },
@@ -265,7 +265,7 @@ export default function PlayerStats() {
 
                     {/* Best game */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Best Game</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Best Game</div>
                         <div className="rounded-lg bg-gray-800 py-3 px-4">
                             {stats.bestGameDarts !== null ? (
                                 <>
@@ -300,7 +300,7 @@ export default function PlayerStats() {
 
                     {/* W/L */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Record</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Record</div>
                         <div className="flex gap-4">
                             {[
                                 { label: "Wins",   value: stats501.wins,        color: "#cc2200" },
@@ -322,7 +322,7 @@ export default function PlayerStats() {
 
                     {/* Averages */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Averages</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Averages</div>
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: "Avg per turn",    value: stats501.avgPerTurn      != null ? stats501.avgPerTurn.toFixed(1)      : "—" },
@@ -338,7 +338,7 @@ export default function PlayerStats() {
 
                     {/* Checkout */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Checkout</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Checkout</div>
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: "Checkouts", value: stats501.checkouts },
@@ -354,7 +354,7 @@ export default function PlayerStats() {
 
                     {/* Best game */}
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Best Game</div>
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Best Game</div>
                         <div className="rounded-lg bg-gray-800 py-3 px-4">
                             {stats501.bestGameDarts !== null ? (
                                 <>
@@ -383,7 +383,7 @@ export default function PlayerStats() {
             {/* Last Game */}
             {lastGame && (
                 <div className="mt-4">
-                    <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                    <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                         Last Game
                     </div>
                     <Link

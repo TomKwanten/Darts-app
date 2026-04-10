@@ -82,11 +82,11 @@ export default function Game() {
 
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0">
-                <h1 className="text-lg font-black uppercase tracking-tight text-gray-100">
+                <h1 className="text-xl font-black uppercase tracking-tight text-gray-100">
                     {gameMode === "501" ? "501" : "Cricket"}
                 </h1>
                 <Link to="/stats"
-                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
                     Stats →
                 </Link>
             </div>

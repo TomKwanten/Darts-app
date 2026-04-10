@@ -113,7 +113,7 @@ export default function GameDetail() {
                             day: "numeric", month: "long", year: "numeric"
                         })}
                         {game.winner && (
-                            <span className="ml-2 font-black uppercase tracking-wider"
+                            <span className="text-sm ml-2 font-black uppercase tracking-wider"
                                 style={{ color: "#cc2200" }}>
                                 · 🎯 {game.winner.name}
                             </span>
@@ -121,14 +121,14 @@ export default function GameDetail() {
                     </p>
                 </div>
                 <Link to="/stats"
-                    className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
                     ← Stats
                 </Link>
             </div>
 
             {/* Per-player stat cards */}
             <div className="mb-8">
-                <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                     Players
                 </div>
                 <div className="flex flex-col gap-2">
@@ -190,7 +190,7 @@ export default function GameDetail() {
             {/* Score progression chart */}
             {hasTurns && (
                 <div className="mb-8">
-                    <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                    <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                         Score Progression
                     </div>
                     <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
@@ -230,7 +230,7 @@ export default function GameDetail() {
                 <>
                     {/* Key Stats */}
                     <div className="mb-8">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                             Key Stats
                         </div>
                         <div className="flex flex-col gap-2">
@@ -278,14 +278,14 @@ export default function GameDetail() {
 
                     {/* Score Bands */}
                     <div className="mb-8">
-                        <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
+                        <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
                             Score Bands
                         </div>
                         <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden">
                             <table className="w-full text-xs">
                                 <thead>
                                     <tr className="border-b border-gray-700">
-                                        <th className="text-left px-3 py-2 text-gray-600 font-normal uppercase tracking-wider">
+                                        <th className="text-left px-3 py-2 text-gray-400 font-normal uppercase tracking-wider">
                                             Score
                                         </th>
                                         {playerStats.map(({ player, turnCount }, index) => (

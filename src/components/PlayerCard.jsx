@@ -7,7 +7,7 @@ function renderMarks(count, number) {
 
     if (closed) {
         return (
-            <span className="font-black text-xs leading-none" style={{ color: isBull ? "#d4a017" : "#cc2200" }}>
+            <span className="font-black text-sm leading-none " style={{ color: isBull ? "#d4a017" : "#cc2200" }}>
                 ✕
             </span>
         );
@@ -20,8 +20,8 @@ function renderMarks(count, number) {
                     key={i}
                     className="inline-block rounded-full transition-all duration-200"
                     style={{
-                        width: "5px",
-                        height: "5px",
+                        width: "13px",
+                        height: "13px",
                         backgroundColor: i < count ? "#cc2200" : "#374151",
                     }}
                 />
@@ -44,7 +44,7 @@ export default function PlayerCard({ player, isActive, gameMode }) {
                     {player.name}
                 </span>
                 {gameMode === "cricket" && (
-                    <span className="text-sm font-black tabular-nums" style={{ color: "#cc2200" }}>
+                    <span className="text-lg font-black tabular-nums" style={{ color: "#cc2200" }}>
                         {player.points}
                     </span>
                 )}

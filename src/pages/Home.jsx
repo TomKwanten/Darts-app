@@ -55,8 +55,9 @@ export default function Home() {
                                 {mode.label}
                             </span>
                             {mode.available && (
-                                <span className="text-xs font-bold uppercase tracking-wider"
-                                    style={{ color: BOARD_GREEN }}>
+                                <span
+                                    className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full"
+                                    style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
                                     Play →
                                 </span>
                             )}
