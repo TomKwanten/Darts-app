@@ -14,7 +14,7 @@ export function applyMarks(player, hits) {
     for (const number in player.marks) {
         const currentMarks = player.marks[number];
         const hitOnNumber = hits[number] || 0;
-        const maxMarks = parseInt(number) === 25 ? 2 : 3; // Bull can only be hit twice
+        const maxMarks = 3;
         newMarks[number] = Math.min(currentMarks + hitOnNumber, maxMarks);
     }
     return newMarks;
@@ -25,7 +25,7 @@ export function calculatePoints(player, hits, allPlayers, originalMarks) {
     const opponents = allPlayers.filter(p => p.name !== player.name);
 
     for (const number in hits) {
-        const maxMarks = parseInt(number) === 25 ? 2 : 3; // Bull can only be hit twice
+        const maxMarks = 3;
         const playerClosed = player.marks[number] === maxMarks;
         const allOpponentsClosed = opponents.every(p => p.marks[number] === maxMarks);
         const hitsOnNumber = hits[number] || 0;

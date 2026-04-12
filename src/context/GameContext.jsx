@@ -151,7 +151,7 @@ export default function GameProvider({ children }) {
                 const maxPoints = Math.max(...updatedPlayers.map(p => p.points));
                 const winningPlayer = updatedPlayers.find(player => {
                     const allClosed = Object.entries(player.marks).every(([number, marks]) => {
-                        const maxMarks = parseInt(number) === 25 ? 2 : 3;
+                        const maxMarks = 3;
                         return marks === maxMarks;
                     });
                     return allClosed && player.points === maxPoints;

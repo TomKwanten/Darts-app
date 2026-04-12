@@ -1,13 +1,14 @@
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
 
-function renderMarks(count, number) {
+function renderMarks(count, number, allClosed) {
+    const maxMarks = 3;
     const isBull = number === 25;
-    const maxMarks = isBull ? 2 : 3;
     const closed = count === maxMarks;
 
-    if (closed) {
+    if (closed || allClosed) {
         return (
-            <span className="font-black text-sm leading-none " style={{ color: isBull ? "#d4a017" : "#cc2200" }}>
+            <span className="font-black text-sm leading-none"
+                style={{ color: allClosed ? "#374151" : (isBull ? "#d4a017" : "#cc2200") }}>
                 ✕
             </span>
         );
@@ -37,7 +38,7 @@ function dartLabel(dart) {
     return `${prefix}${num}`;
 }
 
-export default function PlayerCard({ player, isActive, gameMode, currentTurn }) {
+export default function PlayerCard({ player, isActive, gameMode, currentTurn, players }) {
     return (
         <div className="flex-1 rounded-xl border bg-gray-900 p-2 transition-all duration-300"
             style={{
@@ -61,43 +62,47 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn }) 
             <div className="mb-2 h-[2px] rounded-full"
                 style={{ backgroundColor: isActive ? "#cc2200" : "#1f2937" }} />
 
-            {/* Current turn dart chips — active player only */}
-            {isActive && (
-                <div className="flex gap-1 mb-2 px-1">
-                    {[0, 1, 2].map((i) => {
-                        const dart = currentTurn[i];
-                        return (
-                            <div
-                                key={i}
-                                className="flex-1 rounded-md text-center text-[15px] font-black uppercase tracking-wide py-[3px] transition-all duration-150"
-                                style={{
-                                    backgroundColor: dart ? "#1a4731" : "#1f2937",
-                                    color: dart ? "#86efac" : "#374151",
-                                }}>
-                                {dart ? dartLabel(dart) : "·"}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+            {/* Current turn dart chips — always rendered for equal height */}
+            <div className="flex gap-1 mb-2 px-1">
+                {[0, 1, 2].map((i) => {
+                    const dart = isActive ? currentTurn[i] : null;
+                    return (
+                        <div
+                            key={i}
+                            className="flex-1 rounded-md text-center text-[15px] font-black uppercase tracking-wide py-[3px] transition-all duration-150"
+                            style={{
+                                backgroundColor: dart ? "#1a4731" : (isActive ? "#1f2937" : "transparent"),
+                                color: dart ? "#86efac" : "transparent",
+                            }}>
+                            {dart ? dartLabel(dart) : "·"}
+                        </div>
+                    );
+                })}
+            </div>
 
             {/* Cricket: marks grid */}
             {gameMode === "cricket" && (
                 <div className="flex flex-col gap-[2px]">
                     {NUMBERS.map((number) => {
-                        const isBull = number === 25;
-                        const maxMarks = isBull ? 2 : 3;
+                        const maxMarks = 3;
+                        const allClosed = players
+                            ? players.every(p => p.marks[number] === maxMarks)
+                            : false;
                         const closed = player.marks[number] === maxMarks;
                         return (
                             <div key={number}
-                                className="flex items-center justify-between px-1 py-[2px] rounded"
-                                style={{ backgroundColor: closed ? "#0d0d0d" : "transparent" }}>
+                                className="flex items-center justify-between px-1 py-[2px] rounded relative"
+                                style={{ backgroundColor: allClosed ? "#080808" : closed ? "#0d0d0d" : "transparent" }}>
+                                {allClosed && (
+                                    <div className="absolute inset-x-0 top-1/2 h-[1px]"
+                                        style={{ backgroundColor: "#374151" }} />
+                                )}
                                 <span className="text-xs font-bold tabular-nums w-6 text-right"
-                                    style={{ color: closed ? "#374151" : "#9ca3af" }}>
-                                    {isBull ? "B" : number}
+                                    style={{ color: allClosed ? "#1f2937" : closed ? "#374151" : "#9ca3af" }}>
+                                    {number === 25 ? "B" : number}
                                 </span>
                                 <div className="flex items-center justify-end w-10">
-                                    {renderMarks(player.marks[number], number)}
+                                    {renderMarks(player.marks[number], number, allClosed)}
                                 </div>
                             </div>
                         );

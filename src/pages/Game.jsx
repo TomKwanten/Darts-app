@@ -131,6 +131,7 @@ export default function Game() {
                             isActive={index === currentPlayerIndex}
                             gameMode={gameMode}
                             currentTurn={index === currentPlayerIndex ? currentTurn : []}
+                            players={players}
                         />
                     </div>
                 ))}

@@ -29,9 +29,11 @@
       - Checkout count + checkout rate
       - Best game (fewest darts to win)
 - [x] Bug fix: 501-only players no longer hit blank screen on player detail page
+- [x] Undo across turns breaks scoreboard — undo only works within the current turn; going back a turn and pressing undo causes the scoreboard to disappear. Needs a proper turn history stack.
+- [x] Current turn log (Cricket) — show the player which darts/scores they've entered so far in the current turn
+- [x] Closed number highlight (Cricket) — grey out / cross off a number when all players have closed it and nobody can score on it
 
 ## Bugs
-- [ ] Undo across turns breaks scoreboard — undo only works within the current turn; going back a turn and pressing undo causes the scoreboard to disappear. Needs a proper turn history stack.
 - [ ] Score of 1 not flagged as bust (501) — remaining score of 1 should auto-bust since no valid double/triple finish exists.
 - [ ] Bull shows 2 hit indicators instead of 3 (Cricket) — bull requires 3 hits to close, indicator dots should match.
 
@@ -40,8 +42,6 @@
 - [ ] Overall stats section on player detail page
 - [ ] Per-gamemode stats filtering on main Stats page
 - [ ] Bust button (501) — one-tap shortcut to log a bust without entering all darts
-- [ ] Closed number highlight (Cricket) — grey out / cross off a number when all players have closed it and nobody can score on it
-- [ ] Current turn log (Cricket) — show the player which darts/scores they've entered so far in the current turn
 - [ ] 1 miss = full missed turn (Cricket) — pressing miss once logs a complete 3-dart missed turn
 
 ## Stats & Features
