@@ -7,7 +7,7 @@ import { saveGame } from "../utils/api";
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -130,6 +130,7 @@ export default function Game() {
                             player={player}
                             isActive={index === currentPlayerIndex}
                             gameMode={gameMode}
+                            currentTurn={index === currentPlayerIndex ? currentTurn : []}
                         />
                     </div>
                 ))}

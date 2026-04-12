@@ -67,7 +67,7 @@ export default function Numpad() {
                     dispatch({ type: "UNDO_DART" });
                     setSelectedNumber(null);
                 }}
-                disabled={dartsThisTurn === 0 && gameState.history.length === 0}
+                disabled={dartsThisTurn === 0 && gameState.turnHistory.length === 0}
                 className="py-3 rounded-xl text-sm font-black uppercase tracking-wider
                            transition-all duration-150 active:scale-95 disabled:opacity-25"
                 style={{ backgroundColor: "#1f2937", color: "#9ca3af" }}>

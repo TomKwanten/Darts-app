@@ -11,7 +11,7 @@ const initialState = {
     currentPlayerIndex: 0,
     currentTurn: [],
     winner: null,
-    history: [],
+    turnHistory: [],
     turnNumber: 1,
     turns: [],
 };
@@ -29,23 +29,33 @@ export default function GameProvider({ children }) {
                 };
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };
-            case "UNDO_DART":
+            case "UNDO_DART": {
+                // Within the current turn — just pop the last dart
                 if (state.currentTurn.length > 0) {
                     return { ...state, currentTurn: state.currentTurn.slice(0, -1) };
                 }
-                if (state.history.length === 0) return state;
-                const previous = state.history[state.history.length - 1];
+                // At the start of a turn — restore the previous committed turn
+                if (state.turnHistory.length === 0) return state;
+                const previous = state.turnHistory[state.turnHistory.length - 1];
+                console.log("Restoring snapshot:", JSON.stringify(previous, null, 2));
                 return {
                     ...previous,
-                    currentTurn: previous.currentTurn.slice(0, -1),
-                    history: state.history.slice(0, -1)
+                    currentTurn: previous.submittedTurn.slice(0, -1),
+                    turnHistory: state.turnHistory.slice(0, -1),
                 };
+            }
             case "SUBMIT_TURN": {
+                // Full snapshot of everything needed to restore this moment
                 const snapshot = {
                     players: state.players,
                     currentPlayerIndex: state.currentPlayerIndex,
-                    currentTurn: state.currentTurn,
+                    currentTurn: [],
                     winner: state.winner,
+                    turnNumber: state.turnNumber,
+                    turns: state.turns,
+                    gameMode: state.gameMode,
+                    finishMultiplier: state.finishMultiplier,
+                    submittedTurn: state.currentTurn,
                 };
 
                 if (state.gameMode === "501") {
@@ -92,7 +102,7 @@ export default function GameProvider({ children }) {
                         currentPlayerIndex: nextPlayerIndex,
                         currentTurn: [],
                         winner: winnerObj,
-                        history: [...state.history, snapshot],
+                        turnHistory: [...state.turnHistory, snapshot],
                         turnNumber: state.turnNumber + 1,
                         turns: [...state.turns, turnData],
                     };
@@ -153,7 +163,7 @@ export default function GameProvider({ children }) {
                     currentPlayerIndex: nextPlayerIndex,
                     currentTurn: [],
                     winner: winningPlayer ? { id: winningPlayer.id, name: winningPlayer.name, finalPlayers: updatedPlayers } : null,
-                    history: [...state.history, snapshot],
+                    turnHistory: [...state.turnHistory, snapshot],
                     turnNumber: state.turnNumber + 1,
                     turns: currentPlayerTurnData 
                         ? [...state.turns, currentPlayerTurnData]

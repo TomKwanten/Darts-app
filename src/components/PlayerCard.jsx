@@ -30,7 +30,14 @@ function renderMarks(count, number) {
     );
 }
 
-export default function PlayerCard({ player, isActive, gameMode }) {
+function dartLabel(dart) {
+    if (dart.number === 0) return "Miss";
+    const prefix = dart.multiplier === 2 ? "D" : dart.multiplier === 3 ? "T" : "S";
+    const num = dart.number === 25 ? "B" : dart.number;
+    return `${prefix}${num}`;
+}
+
+export default function PlayerCard({ player, isActive, gameMode, currentTurn }) {
     return (
         <div className="flex-1 rounded-xl border bg-gray-900 p-2 transition-all duration-300"
             style={{
@@ -53,6 +60,26 @@ export default function PlayerCard({ player, isActive, gameMode }) {
             {/* Active bar */}
             <div className="mb-2 h-[2px] rounded-full"
                 style={{ backgroundColor: isActive ? "#cc2200" : "#1f2937" }} />
+
+            {/* Current turn dart chips — active player only */}
+            {isActive && (
+                <div className="flex gap-1 mb-2 px-1">
+                    {[0, 1, 2].map((i) => {
+                        const dart = currentTurn[i];
+                        return (
+                            <div
+                                key={i}
+                                className="flex-1 rounded-md text-center text-[15px] font-black uppercase tracking-wide py-[3px] transition-all duration-150"
+                                style={{
+                                    backgroundColor: dart ? "#1a4731" : "#1f2937",
+                                    color: dart ? "#86efac" : "#374151",
+                                }}>
+                                {dart ? dartLabel(dart) : "·"}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Cricket: marks grid */}
             {gameMode === "cricket" && (

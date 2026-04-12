@@ -1,0 +1,158 @@
+
+<style>
+  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 1rem 0; }
+  .col-header { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 10px 14px; margin-bottom: 8px; }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .card-sub { font-size: 12px; color: var(--color-text-secondary); margin: 0; line-height: 1.5; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; border-radius: 4px; padding: 1px 7px; margin-right: 4px; margin-bottom: 4px; }
+  .b-bug { background: #FCEBEB; color: #A32D2D; }
+  .b-ui { background: #E6F1FB; color: #185FA5; }
+  .b-stat { background: #EAF3DE; color: #3B6D11; }
+  .b-mode { background: #EEEDFE; color: #3C3489; }
+  .b-done { background: #E1F5EE; color: #0F6E56; }
+  .check { color: var(--color-text-success); margin-right: 4px; }
+  @media (prefers-color-scheme: dark) {
+    .b-bug { background: #501313; color: #F7C1C1; }
+    .b-ui { background: #042C53; color: #B5D4F4; }
+    .b-stat { background: #173404; color: #C0DD97; }
+    .b-mode { background: #26215C; color: #CECBF6; }
+    .b-done { background: #04342C; color: #9FE1CB; }
+  }
+</style>
+
+<div class="board">
+
+  <div>
+    <div class="col-header">🐛 Bugs to fix</div>
+
+    <div class="card">
+      <p class="card-title">Undo across turns breaks scoreboard</p>
+      <p class="card-sub">Undo only works within the current turn. Going back a turn and pressing undo causes the whole scoreboard to disappear. Needs a proper turn history stack.</p>
+      <span class="badge b-bug">Bug</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Score of 1 not shown as bust</p>
+      <p class="card-sub">In 501, a score of 1 remaining is a bust (no valid double/triple finish exists), but the UI doesn't reflect this. Should auto-flag as bust.</p>
+      <span class="badge b-bug">Bug</span>
+      <span class="badge b-ui">501</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-header">⚡ Up next</div>
+
+    <div class="card">
+      <p class="card-title">Small UI improvements</p>
+      <p class="card-sub">Batch of visual fixes already approved — cricket hit-indicator dot size, miss button color, play button brightness, setup overlay legibility.</p>
+      <span class="badge b-ui">UI</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Overall stats section</p>
+      <p class="card-sub">Stub on player detail page needs to be wired up with cross-gamemode aggregate stats.</p>
+      <span class="badge b-stat">Stats</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Per-gamemode stats filter</p>
+      <p class="card-sub">Main Stats page should let you filter by game mode.</p>
+      <span class="badge b-stat">Stats</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Bust button (501)</p>
+      <p class="card-sub">One-tap bust shortcut so players don't have to enter all darts when they already know they're bust.</p>
+      <span class="badge b-ui">UI</span>
+      <span class="badge b-ui">501</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Closed number highlight (Cricket)</p>
+      <p class="card-sub">When all players have closed a number and nobody can score on it, visually mark it as fully closed (grey out / cross off).</p>
+      <span class="badge b-ui">UI</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Bull shows 3 hit indicators (Cricket)</p>
+      <p class="card-sub">Bull currently shows 2 dots — should show 3 like all other numbers, since bull requires 3 hits to close.</p>
+      <span class="badge b-bug">Bug</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Current turn log (Cricket)</p>
+      <p class="card-sub">Show the player what darts/scores they've already entered in the current turn, so they don't lose track mid-turn.</p>
+      <span class="badge b-ui">UI</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">1 miss = full missed turn (Cricket)</p>
+      <p class="card-sub">Pressing miss once logs a full 3-dart missed turn. Speeds up play when a player misses all 3 darts.</p>
+      <span class="badge b-ui">UI</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-header">📊 Stats & features</div>
+
+    <div class="card">
+      <p class="card-title">Bull stat (red/green)</p>
+      <p class="card-sub">Track singles vs doubles on the bull per player. Show lifetime bull count (red bull / green bull) in PlayerStats.</p>
+      <span class="badge b-stat">Stats</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">"Gepikt" (stolen) stat</p>
+      <p class="card-sub">A fun button in Cricket — tap when you hit a number you didn't intend to score on. Logged as a lifetime "stolen points" counter in PlayerStats.</p>
+      <span class="badge b-stat">Stats</span>
+      <span class="badge b-ui">Cricket</span>
+    </div>
+
+    <div class="col-header" style="margin-top:16px;">🎯 Game modes</div>
+
+    <div class="card">
+      <p class="card-title">Around the Clock</p>
+      <span class="badge b-mode">Game mode</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Score Training</p>
+      <span class="badge b-mode">Game mode</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Shanghai</p>
+      <span class="badge b-mode">Game mode</span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Halve It</p>
+      <span class="badge b-mode">Game mode</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-header">✅ Done</div>
+
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Stats page wired to API</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Individual player stats + detail page</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Confirm before delete</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Loading & error states</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Rename & delete player</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Mid-game navigation guard (useBlocker)</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">PWA / installable on phone</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Game detail page + Recharts</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Per-turn data storage</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">501 game mode end-to-end</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Miss button (all modes)</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">501 stats block in PlayerStats</p></div>
+    <div class="card"><p class="card-title" style="font-size:13px; color: var(--color-text-secondary); font-weight:400; margin:0;">Bug fix: 501-only players blank screen</p></div>
+  </div>
+
+</div>
