@@ -25,7 +25,8 @@ export default function Numpad() {
 
     function handleMiss() {
         if (turnFull) return;
-        dispatch({ type: "ADD_DART", payload: { number: 0, multiplier: 1 } });
+        dispatch({ type: "MISS_TURN" });
+        setSelectedNumber(null);
     }
 
     function handleSelectNumber(n) {

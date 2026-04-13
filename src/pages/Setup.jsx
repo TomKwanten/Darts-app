@@ -336,7 +336,7 @@ export default function Setup() {
 
             {/* Back link */}
             <Link to="/"
-                className="mt-8 text-xs uppercase tracking-widest text-gray-600
+                className="mt-8 text-lg uppercase tracking-widest text-gray-400
                            hover:text-gray-400 transition-colors duration-150">
                 ← Back
             </Link>

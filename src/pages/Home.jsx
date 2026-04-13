@@ -69,7 +69,7 @@ export default function Home() {
 
             {/* Footer */}
             <Link to="/stats"
-                className="mt-10 text-xs uppercase tracking-widest text-gray-600
+                className="mt-10 text-lg uppercase tracking-widest text-gray-400
                            hover:text-gray-400 transition-colors duration-150">
                 View Stats →
             </Link>
