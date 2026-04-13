@@ -33,11 +33,10 @@
 - [x] Current turn log (Cricket) — show the player which darts/scores they've entered so far in the current turn
 - [x] Closed number highlight (Cricket) — grey out / cross off a number when all players have closed it and nobody can score on it
 - [x] Score of 1 not flagged as bust (501) — remaining score of 1 should auto-bust since no valid double/triple finish exists.
-- [ ] Bull shows 2 hit indicators instead of 3 (Cricket) — bull requires 3 hits to close, indicator dots should match.
+- [x] Bull shows 2 hit indicators instead of 3 (Cricket) — bull requires 3 hits to close, indicator dots should match.
 
 ## Bugs
 - [ ] Cricket PlayerCard layout breaks with 3+ players — hit indicator dots sit too close to the number, and the green round score chips overflow the card width.
-- [ ] 501 score subtraction wrong — the score shown on the arrow is not being subtracted correctly from the running total.
 
 ## Up Next
 - [ ] Small UI improvements (approved, not yet applied)

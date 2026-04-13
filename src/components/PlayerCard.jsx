@@ -111,14 +111,25 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
             )}
 
             {/* 501: remaining score */}
-            {gameMode === "501" && (
-                <div className="flex items-center justify-center py-2">
-                    <span className="text-3xl font-black tabular-nums"
-                        style={{ color: isActive ? "#cc2200" : "#9ca3af" }}>
-                        {player.score}
-                    </span>
-                </div>
-            )}
+            {gameMode === "501" && (() => {
+                const turnTotal = isActive
+                    ? currentTurn.reduce((sum, d) => sum + d.number * d.multiplier, 0)
+                    : 0;
+                const displayed = player.score - turnTotal;
+                const isBust = displayed < 0 || displayed === 1;
+                const isRunning = isActive && currentTurn.length > 0;
+
+                return (
+                    <div className="flex items-center justify-center py-2">
+                        <span className="text-3xl font-black tabular-nums"
+                            style={{
+                                color: isBust ? "#f59e0b" : isRunning ? "#22c55e" : isActive ? "#cc2200" : "#9ca3af",
+                            }}>
+                            {displayed}
+                        </span>
+                    </div>
+                );
+            })()}
         </div>
     );
 }
