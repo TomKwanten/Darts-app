@@ -34,26 +34,26 @@
 - [x] Closed number highlight (Cricket) — grey out / cross off a number when all players have closed it and nobody can score on it
 - [x] Score of 1 not flagged as bust (501) — remaining score of 1 should auto-bust since no valid double/triple finish exists.
 - [x] Bull shows 2 hit indicators instead of 3 (Cricket) — bull requires 3 hits to close, indicator dots should match.
+- [x] Cricket PlayerCard layout breaks with 3+ players — hit indicator dots sit too close to the number, and the green round score chips overflow the card width.
+- [x] 1 miss = full missed turn (Cricket) — pressing miss once logs a complete 3-dart missed turn
+- [x] All game modes: In-game ranking indicator — colour-coded badge or strip on each PlayerCard showing current position (1st, 2nd, etc.) based on remaining score
+- [x] Cricket: Live hit preview dots — show a green dot filling each empty indicator slot as darts are entered during a turn; dots turn red on submit (matching existing confirmed-hit style)
 
 ## Bugs
-- [ ] Cricket PlayerCard layout breaks with 3+ players — hit indicator dots sit too close to the number, and the green round score chips overflow the card width.
+
 
 ## Up Next
-- [ ] Small UI improvements (approved, not yet applied)
 - [ ] 501: Automatic checkout suggestion — calculate and display what the player needs to finish from their current remaining score
 - [ ] Overall stats section on player detail page
 - [ ] Per-gamemode stats filtering on main Stats page
 - [ ] Bust button (501) — one-tap shortcut to log a bust without entering all darts
-- [ ] 1 miss = full missed turn (Cricket) — pressing miss once logs a complete 3-dart missed turn
 
 ## Stats & Features
 - [ ] Bull stat — track red bull (single) vs green bull (double) per player; show lifetime count in PlayerStats
 - [ ] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
 
 ## Nice to Have
-- [ ] 501: In-game ranking indicator — colour-coded badge or strip on each PlayerCard showing current position (1st, 2nd, etc.) based on remaining score
 - [ ] All game modes: "Best throw last round" highlight — show which player threw the highest score in the previous round
-- [ ] Cricket: Live hit preview dots — show a green dot filling each empty indicator slot as darts are entered during a turn; dots turn red on submit (matching existing confirmed-hit style)
 
 ## Up Next (Game Modes)
 - [ ] Around the Clock game mode

@@ -5,6 +5,40 @@ import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
 import { saveGame } from "../utils/api";
 
+const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
+
+function computeRanks(players, gameMode) {
+    const sorted = [...players].sort((a, b) => {
+        if (gameMode === "501") {
+            return a.score - b.score; // lower remaining = better
+        }
+        // Cricket: points desc, then closed numbers desc
+        if (b.points !== a.points) return b.points - a.points;
+        const closedA = NUMBERS.filter(n => a.marks[n] === 3).length;
+        const closedB = NUMBERS.filter(n => b.marks[n] === 3).length;
+        return closedB - closedA;
+    });
+
+    // Build rank map — ties get the same rank
+    const rankMap = {};
+    sorted.forEach((player, i) => {
+        if (i === 0) {
+            rankMap[player.name] = 1;
+        } else {
+            const prev = sorted[i - 1];
+            const samePoints = player.points === prev.points;
+            const sameClosed = gameMode !== "501" &&
+                NUMBERS.filter(n => player.marks[n] === 3).length ===
+                NUMBERS.filter(n => prev.marks[n] === 3).length;
+            const sameScore = gameMode === "501" && player.score === prev.score;
+            const isTie = gameMode === "501" ? sameScore : (samePoints && sameClosed);
+            rankMap[player.name] = isTie ? rankMap[prev.name] : i + 1;
+        }
+    });
+
+    return rankMap;
+}
+
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
     const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn } = gameState;
@@ -35,6 +69,8 @@ export default function Game() {
             setSaveError(true);
         });
     }, [winner]);
+
+    const rankMap = computeRanks(players, gameMode);
 
     if (players.length === 0) {
         return (
@@ -132,6 +168,7 @@ export default function Game() {
                             gameMode={gameMode}
                             currentTurn={index === currentPlayerIndex ? currentTurn : []}
                             players={players}
+                            rank={rankMap[player.name]}
                         />
                     </div>
                 ))}
