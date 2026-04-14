@@ -38,12 +38,12 @@
 - [x] 1 miss = full missed turn (Cricket) — pressing miss once logs a complete 3-dart missed turn
 - [x] All game modes: In-game ranking indicator — colour-coded badge or strip on each PlayerCard showing current position (1st, 2nd, etc.) based on remaining score
 - [x] Cricket: Live hit preview dots — show a green dot filling each empty indicator slot as darts are entered during a turn; dots turn red on submit (matching existing confirmed-hit style)
+- [x] 501: Automatic checkout suggestion — calculate and display what the player needs to finish from their current remaining score -> done, but no padding between suggestion scores
 
 ## Bugs
 
 
 ## Up Next
-- [ ] 501: Automatic checkout suggestion — calculate and display what the player needs to finish from their current remaining score
 - [ ] Overall stats section on player detail page
 - [ ] Per-gamemode stats filtering on main Stats page
 - [ ] Bust button (501) — one-tap shortcut to log a bust without entering all darts

@@ -41,7 +41,7 @@ function computeRanks(players, gameMode) {
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -169,6 +169,7 @@ export default function Game() {
                             currentTurn={index === currentPlayerIndex ? currentTurn : []}
                             players={players}
                             rank={rankMap[player.name]}
+                            finishMultiplier={finishMultiplier}
                         />
                     </div>
                 ))}

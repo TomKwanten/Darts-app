@@ -1,3 +1,5 @@
+import { getCheckout } from "../utils/checkouts";
+
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
 
 const RANK_COLORS = {
@@ -68,7 +70,7 @@ function dartLabel(dart) {
     return `${prefix}${num}`;
 }
 
-export default function PlayerCard({ player, isActive, gameMode, currentTurn, players, rank }) {
+export default function PlayerCard({ player, isActive, gameMode, currentTurn, players, rank, finishMultiplier }) {
     return (
         <div className="flex-1 rounded-xl border bg-gray-900 p-1.5 transition-all duration-300"
             style={{
@@ -162,15 +164,29 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                 const displayed = player.score - turnTotal;
                 const isBust = displayed < 0 || displayed === 1;
                 const isRunning = isActive && currentTurn.length > 0;
+                const checkout = isActive && !isBust ? getCheckout(displayed, finishMultiplier) : null;
 
                 return (
-                    <div className="flex items-center justify-center py-2">
+                    <div className="flex flex-col items-center justify-center py-2 gap-1">
                         <span className="text-3xl font-black tabular-nums"
                             style={{
                                 color: isBust ? "#f59e0b" : isRunning ? "#22c55e" : isActive ? "#cc2200" : "#9ca3af",
                             }}>
                             {displayed}
                         </span>
+                        {checkout && (
+                            <div className="flex gap-1">
+                                {checkout.split(" ").map((token, i) => (
+                                    <span
+                                        key={i}
+                                        className="text-[11px] font-bold rounded px-0.5 py-0.5"
+                                        style={{ color: "#22c55e", backgroundColor: "#1a4731" }}
+                                    >
+                                        {token}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 );
             })()}
