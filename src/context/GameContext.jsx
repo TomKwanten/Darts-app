@@ -176,6 +176,62 @@ export default function GameProvider({ children }) {
                 ];
                 return submitTurn({ ...state, currentTurn: filledTurn });
             }
+            case "BUST_TURN": {
+                const currentPlayer = state.players[state.currentPlayerIndex];
+                const missDart = { number: 0, multiplier: 1 };
+                const filledTurn = [
+                    ...state.currentTurn,
+                    ...Array(3 - state.currentTurn.length).fill(missDart),
+                ];
+
+                const snapshot = {
+                    players: state.players,
+                    currentPlayerIndex: state.currentPlayerIndex,
+                    currentTurn: [],
+                    winner: state.winner,
+                    turnNumber: state.turnNumber,
+                    turns: state.turns,
+                    gameMode: state.gameMode,
+                    finishMultiplier: state.finishMultiplier,
+                    submittedTurn: filledTurn,
+                };
+
+                const newDarts = { ...currentPlayer.darts };
+                for (const dart of filledTurn) {
+                    newDarts.total += 1;
+                    if (dart.multiplier === 1) newDarts.singles += 1;
+                    if (dart.multiplier === 2) newDarts.doubles += 1;
+                    if (dart.multiplier === 3) newDarts.triples += 1;
+                }
+
+                const updatedPlayers = state.players.map((player, index) => {
+                    if (index !== state.currentPlayerIndex) return player;
+                    return { ...player, score: currentPlayer.score, darts: newDarts };
+                });
+
+                const turnData = {
+                    player_id: currentPlayer.id,
+                    turn_number: state.turnNumber,
+                    points_scored: 0,
+                    running_total: currentPlayer.score,
+                    singles: filledTurn.filter(d => d.multiplier === 1).length,
+                    doubles: filledTurn.filter(d => d.multiplier === 2).length,
+                    triples: filledTurn.filter(d => d.multiplier === 3).length,
+                };
+
+                const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+
+                return {
+                    ...state,
+                    players: updatedPlayers,
+                    currentPlayerIndex: nextPlayerIndex,
+                    currentTurn: [],
+                    winner: null,
+                    turnHistory: [...state.turnHistory, snapshot],
+                    turnNumber: state.turnNumber + 1,
+                    turns: [...state.turns, turnData],
+                };
+            }
             case "SUBMIT_TURN":
                 return submitTurn(state);
             case "RESET_GAME":

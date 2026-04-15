@@ -29,6 +29,11 @@ export default function Numpad() {
         setSelectedNumber(null);
     }
 
+    function handleBust() {
+        dispatch({ type: "BUST_TURN" });
+        setSelectedNumber(null);
+    }
+
     function handleSelectNumber(n) {
         if (turnFull) return;
         setSelectedNumber(n);
@@ -104,6 +109,27 @@ export default function Numpad() {
         </div>
     );
 
+    const missAndBust = (
+        <div className="grid grid-cols-2 gap-2 flex-shrink-0 pt-1">
+            <button
+                onClick={handleMiss}
+                disabled={turnFull}
+                className="py-2 rounded-xl text-xs font-black uppercase tracking-wider
+                        transition-all duration-150 active:scale-95 disabled:opacity-25"
+                style={{ backgroundColor: "#78350f", color: "#fbbf24" }}>
+                Miss
+            </button>
+            <button
+                onClick={handleBust}
+                disabled={turnFull}
+                className="py-2 rounded-xl text-xs font-black uppercase tracking-wider
+                        transition-all duration-150 active:scale-95 disabled:opacity-25"
+                style={{ backgroundColor: "#78350f", color: "#fbbf24" }}>
+                Bust
+            </button>
+        </div>
+    );
+
     if (gameMode === "501") {
         return (
             <div className="h-full flex flex-col rounded-2xl border border-gray-800 bg-gray-900 p-2 gap-1">
@@ -175,7 +201,7 @@ export default function Numpad() {
                     })}
                 </div>
 
-                {missButton}
+                {missAndBust}
                 {undoSubmit}
             </div>
         );
