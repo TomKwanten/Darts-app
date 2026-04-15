@@ -1,6 +1,6 @@
 import { createContext, useReducer } from "react";
-import { countHits, applyMarks, calculatePoints } from "../utils/cricketLogic";
-import { process501Turn } from "../utils/501logic";
+import { submitTurn501, bustTurn501 } from "../utils/SubmitTurn501.js";
+import { submitTurnCricket } from "../utils/submitTurnCricket";
 
 export const GameContext = createContext();
 
@@ -16,131 +16,10 @@ const initialState = {
     turns: [],
 };
 
-function submitTurn(state) {
-    const snapshot = {
-        players: state.players,
-        currentPlayerIndex: state.currentPlayerIndex,
-        currentTurn: [],
-        winner: state.winner,
-        turnNumber: state.turnNumber,
-        turns: state.turns,
-        gameMode: state.gameMode,
-        finishMultiplier: state.finishMultiplier,
-        submittedTurn: state.currentTurn,
-    };
-
-    if (state.gameMode === "501") {
-        const currentPlayer = state.players[state.currentPlayerIndex];
-        const { finalScore, bust, win } = process501Turn(
-            currentPlayer.score,
-            state.currentTurn,
-            state.finishMultiplier
-        );
-
-        const newDarts = { ...currentPlayer.darts };
-        for (const dart of state.currentTurn) {
-            newDarts.total += 1;
-            if (dart.multiplier === 1) newDarts.singles += 1;
-            if (dart.multiplier === 2) newDarts.doubles += 1;
-            if (dart.multiplier === 3) newDarts.triples += 1;
-        }
-
-        const updatedPlayers = state.players.map((player, index) => {
-            if (index !== state.currentPlayerIndex) return player;
-            return { ...player, score: finalScore, darts: newDarts };
-        });
-
-        const pointsScored = bust ? 0 : currentPlayer.score - finalScore;
-
-        const turnData = {
-            player_id: currentPlayer.id,
-            turn_number: state.turnNumber,
-            points_scored: pointsScored,
-            running_total: finalScore,
-            singles: state.currentTurn.filter(d => d.multiplier === 1).length,
-            doubles: state.currentTurn.filter(d => d.multiplier === 2).length,
-            triples: state.currentTurn.filter(d => d.multiplier === 3).length,
-        };
-
-        const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-        const winnerObj = win
-            ? { id: currentPlayer.id, name: currentPlayer.name, finalPlayers: updatedPlayers }
-            : null;
-
-        return {
-            ...state,
-            players: updatedPlayers,
-            currentPlayerIndex: nextPlayerIndex,
-            currentTurn: [],
-            winner: winnerObj,
-            turnHistory: [...state.turnHistory, snapshot],
-            turnNumber: state.turnNumber + 1,
-            turns: [...state.turns, turnData],
-        };
-    }
-
-    // Cricket
-    const hits = countHits(state.currentTurn);
-    const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-
-    let currentPlayerTurnData = null;
-
-    const updatedPlayers = state.players.map((player, index) => {
-        if (index !== state.currentPlayerIndex) return player;
-        const newMarks = applyMarks(player, hits);
-        const earnedPoints = calculatePoints(
-            { ...player, marks: newMarks },
-            hits,
-            state.players,
-            player.marks
-        );
-        const newDarts = { ...player.darts };
-        for (const dart of state.currentTurn) {
-            newDarts.total += 1;
-            if (dart.multiplier === 1) newDarts.singles += 1;
-            if (dart.multiplier === 2) newDarts.doubles += 1;
-            if (dart.multiplier === 3) newDarts.triples += 1;
-        }
-
-        currentPlayerTurnData = {
-            player_id: player.id,
-            turn_number: state.turnNumber,
-            points_scored: earnedPoints,
-            running_total: player.points + earnedPoints,
-            singles: newDarts.singles - player.darts.singles,
-            doubles: newDarts.doubles - player.darts.doubles,
-            triples: newDarts.triples - player.darts.triples,
-        };
-
-        return {
-            ...player,
-            marks: newMarks,
-            points: player.points + earnedPoints,
-            darts: newDarts,
-        };
-    });
-
-    const maxPoints = Math.max(...updatedPlayers.map(p => p.points));
-    const winningPlayer = updatedPlayers.find(player => {
-        const allClosed = Object.entries(player.marks).every(([, marks]) => marks === 3);
-        return allClosed && player.points === maxPoints;
-    }) ?? null;
-
-    return {
-        ...state,
-        players: updatedPlayers,
-        currentPlayerIndex: nextPlayerIndex,
-        currentTurn: [],
-        winner: winningPlayer
-            ? { id: winningPlayer.id, name: winningPlayer.name, finalPlayers: updatedPlayers }
-            : null,
-        turnHistory: [...state.turnHistory, snapshot],
-        turnNumber: state.turnNumber + 1,
-        turns: currentPlayerTurnData
-            ? [...state.turns, currentPlayerTurnData]
-            : state.turns,
-    };
-}
+const submitHandlers = {
+    "501": submitTurn501,
+    "cricket": submitTurnCricket,
+};
 
 export default function GameProvider({ children }) {
     function gameReducer(state, action) {
@@ -174,66 +53,15 @@ export default function GameProvider({ children }) {
                     ...state.currentTurn,
                     ...Array(3 - state.currentTurn.length).fill(missDart),
                 ];
-                return submitTurn({ ...state, currentTurn: filledTurn });
+                const handler = submitHandlers[state.gameMode];
+                return handler({ ...state, currentTurn: filledTurn });
             }
-            case "BUST_TURN": {
-                const currentPlayer = state.players[state.currentPlayerIndex];
-                const missDart = { number: 0, multiplier: 1 };
-                const filledTurn = [
-                    ...state.currentTurn,
-                    ...Array(3 - state.currentTurn.length).fill(missDart),
-                ];
-
-                const snapshot = {
-                    players: state.players,
-                    currentPlayerIndex: state.currentPlayerIndex,
-                    currentTurn: [],
-                    winner: state.winner,
-                    turnNumber: state.turnNumber,
-                    turns: state.turns,
-                    gameMode: state.gameMode,
-                    finishMultiplier: state.finishMultiplier,
-                    submittedTurn: filledTurn,
-                };
-
-                const newDarts = { ...currentPlayer.darts };
-                for (const dart of filledTurn) {
-                    newDarts.total += 1;
-                    if (dart.multiplier === 1) newDarts.singles += 1;
-                    if (dart.multiplier === 2) newDarts.doubles += 1;
-                    if (dart.multiplier === 3) newDarts.triples += 1;
-                }
-
-                const updatedPlayers = state.players.map((player, index) => {
-                    if (index !== state.currentPlayerIndex) return player;
-                    return { ...player, score: currentPlayer.score, darts: newDarts };
-                });
-
-                const turnData = {
-                    player_id: currentPlayer.id,
-                    turn_number: state.turnNumber,
-                    points_scored: 0,
-                    running_total: currentPlayer.score,
-                    singles: filledTurn.filter(d => d.multiplier === 1).length,
-                    doubles: filledTurn.filter(d => d.multiplier === 2).length,
-                    triples: filledTurn.filter(d => d.multiplier === 3).length,
-                };
-
-                const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-
-                return {
-                    ...state,
-                    players: updatedPlayers,
-                    currentPlayerIndex: nextPlayerIndex,
-                    currentTurn: [],
-                    winner: null,
-                    turnHistory: [...state.turnHistory, snapshot],
-                    turnNumber: state.turnNumber + 1,
-                    turns: [...state.turns, turnData],
-                };
+            case "BUST_TURN":
+                return bustTurn501(state);
+            case "SUBMIT_TURN": {
+                const handler = submitHandlers[state.gameMode];
+                return handler(state);
             }
-            case "SUBMIT_TURN":
-                return submitTurn(state);
             case "RESET_GAME":
                 return initialState;
             default:

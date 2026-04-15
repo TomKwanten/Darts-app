@@ -39,24 +39,23 @@
 - [x] All game modes: In-game ranking indicator — colour-coded badge or strip on each PlayerCard showing current position (1st, 2nd, etc.) based on remaining score
 - [x] Cricket: Live hit preview dots — show a green dot filling each empty indicator slot as darts are entered during a turn; dots turn red on submit (matching existing confirmed-hit style)
 - [x] 501: Automatic checkout suggestion — calculate and display what the player needs to finish from their current remaining score -> done, but no padding between suggestion scores
+- [x] Bust button (501) — one-tap shortcut to log a bust without entering all darts
 
 ## Bugs
 
-
 ## Up Next
-- [ ] Overall stats section on player detail page
-- [ ] Per-gamemode stats filtering on main Stats page
-- [ ] Bust button (501) — one-tap shortcut to log a bust without entering all darts
+- [ ] Around the Clock game mode
 
 ## Stats & Features
 - [ ] Bull stat — track red bull (single) vs green bull (double) per player; show lifetime count in PlayerStats
 - [ ] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
+- [ ] Overall stats section on player detail page
+- [ ] Per-gamemode stats filtering on main Stats page
 
 ## Nice to Have
 - [ ] All game modes: "Best throw last round" highlight — show which player threw the highest score in the previous round
 
 ## Up Next (Game Modes)
-- [ ] Around the Clock game mode
 
 ## Future Game Modes
 - [ ] Score Training
