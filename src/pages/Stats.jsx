@@ -88,7 +88,7 @@ export default function Stats() {
                 <p className="text-gray-500 text-sm uppercase tracking-widest">No games played yet</p>
                 <Link to="/"
                     className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
-                    ← Back to setup
+                    ‹‹ Back to setup
                 </Link>
             </div>
         );
@@ -106,7 +106,7 @@ export default function Stats() {
                 </h1>
                 <Link to="/"
                     className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
-                    ← Setup
+                    ‹‹ Setup
                 </Link>
             </div>
 

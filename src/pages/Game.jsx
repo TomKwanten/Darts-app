@@ -4,13 +4,22 @@ import { Link, useNavigate, useBlocker } from "react-router-dom";
 import Numpad from "../components/Numpad";
 import PlayerCard from "../components/PlayerCard";
 import { saveGame } from "../utils/api";
+import { getProgressIndex } from "../utils/ATCLogic";
 
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
 
-function computeRanks(players, gameMode) {
+function computeRanks(players, gameMode, order) {
     const sorted = [...players].sort((a, b) => {
         if (gameMode === "501") {
             return a.score - b.score; // lower remaining = better
+        }
+        if (gameMode === "around-the-clock") {
+            // Higher progress index = further along = better rank
+            const progA = getProgressIndex(a.target, order ?? "sequential");
+            const progB = getProgressIndex(b.target, order ?? "sequential");
+            if (progB !== progA) return progB - progA;
+            // Tiebreak: fewer total darts used = better
+            return a.darts.total - b.darts.total;
         }
         // Cricket: points desc, then closed numbers desc
         if (b.points !== a.points) return b.points - a.points;
@@ -26,12 +35,18 @@ function computeRanks(players, gameMode) {
             rankMap[player.name] = 1;
         } else {
             const prev = sorted[i - 1];
-            const samePoints = player.points === prev.points;
-            const sameClosed = gameMode !== "501" &&
-                NUMBERS.filter(n => player.marks[n] === 3).length ===
-                NUMBERS.filter(n => prev.marks[n] === 3).length;
-            const sameScore = gameMode === "501" && player.score === prev.score;
-            const isTie = gameMode === "501" ? sameScore : (samePoints && sameClosed);
+            let isTie = false;
+            if (gameMode === "501") {
+                isTie = player.score === prev.score;
+            } else if (gameMode === "around-the-clock") {
+                isTie = getProgressIndex(player.target, order ?? "sequential") === getProgressIndex(prev.target, order ?? "sequential")
+                    && player.darts.total === prev.darts.total;
+            } else {
+                const samePoints = player.points === prev.points;
+                const sameClosed = NUMBERS.filter(n => player.marks[n] === 3).length ===
+                    NUMBERS.filter(n => prev.marks[n] === 3).length;
+                isTie = samePoints && sameClosed;
+            }
             rankMap[player.name] = isTie ? rankMap[prev.name] : i + 1;
         }
     });
@@ -41,7 +56,7 @@ function computeRanks(players, gameMode) {
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -56,7 +71,7 @@ export default function Game() {
             game_mode: gameMode,
             players: winner.finalPlayers.map(player => ({
                 id: player.id,
-                points: gameMode === "501" ? (501 - player.score) : player.points,
+                points: gameMode === "501" ? (501 - player.score) : (player.points ?? 0),
                 total_darts: player.darts.total,
                 singles: player.darts.singles,
                 doubles: player.darts.doubles,
@@ -70,7 +85,7 @@ export default function Game() {
         });
     }, [winner]);
 
-    const rankMap = computeRanks(players, gameMode);
+    const rankMap = computeRanks(players, gameMode, order);
 
     if (players.length === 0) {
         return (
@@ -83,6 +98,12 @@ export default function Game() {
             </div>
         );
     }
+
+    const gameModeLabel = {
+        "501": "501",
+        "cricket": "Cricket",
+        "around-the-clock": "Around the Clock",
+    }[gameMode] ?? gameMode;
 
     return (
         <div className="h-screen bg-gray-950 flex flex-col px-3 py-3 gap-2 overflow-hidden">
@@ -119,11 +140,11 @@ export default function Game() {
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0">
                 <h1 className="text-xl font-black uppercase tracking-tight text-gray-100">
-                    {gameMode === "501" ? "501" : "Cricket"}
+                    {gameModeLabel}
                 </h1>
                 <Link to="/stats"
                     className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
-                    Stats →
+                    Stats ➔
                 </Link>
             </div>
 
@@ -170,6 +191,7 @@ export default function Game() {
                             players={players}
                             rank={rankMap[player.name]}
                             finishMultiplier={finishMultiplier}
+                            order={order}
                         />
                     </div>
                 ))}

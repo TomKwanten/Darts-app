@@ -16,6 +16,12 @@ const GAME_MODES = [
         description: "Count down from 501. Finish on a double or triple.",
         available: true,
     },
+    {
+        id: "around-the-clock",
+        label: "Around the Clock",
+        description: "Hit 1 through 20 then Bull, in order. First to finish wins.",
+        available: true,
+    },
 ];
 
 export default function Home() {
@@ -58,7 +64,7 @@ export default function Home() {
                                 <span
                                     className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full"
                                     style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
-                                    Play →
+                                    Play ➔
                                 </span>
                             )}
                         </div>
@@ -71,7 +77,7 @@ export default function Home() {
             <Link to="/stats"
                 className="mt-10 text-lg uppercase tracking-widest text-gray-400
                            hover:text-gray-400 transition-colors duration-150">
-                View Stats →
+                View Stats ➔
             </Link>
         </div>
     );

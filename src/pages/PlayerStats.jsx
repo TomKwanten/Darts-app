@@ -150,7 +150,7 @@ export default function PlayerStats() {
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
                 <p className="text-red-400 text-sm uppercase tracking-widest">{error}</p>
                 <Link to="/stats" className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
-                    ← Back to stats
+                    ‹‹ Back to stats
                 </Link>
             </div>
         );
@@ -168,7 +168,7 @@ export default function PlayerStats() {
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
                 <p className="text-gray-500 text-sm uppercase tracking-widest">No games found for this player</p>
                 <Link to="/stats" className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
-                    ← Back to stats
+                    ‹‹ Back to stats
                 </Link>
             </div>
         );
@@ -183,7 +183,7 @@ export default function PlayerStats() {
                     {stats?.playerName ?? lastGame?.players.find(p => p.id === playerId)?.name ?? "Player"}
                 </h1>
                 <Link to="/stats" className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
-                    ← Stats
+                    ‹‹ Stats
                 </Link>
             </div>
 
@@ -192,7 +192,7 @@ export default function PlayerStats() {
                 <select
                     value={gameMode}
                     onChange={e => setGameMode(e.target.value)}
-                    className="bg-gray-900 border border-gray-700 text-gray-100 text-sm uppercase tracking-widest rounded-lg px-3 py-2 focus:outline-none focus:border-gray-500"
+                    className="bg-gray-900 border border-gray-700 text-gray-100 text-sm uppercase tracking-widest rounded-lg px-3 py-2 pr-5 focus:outline-none focus:border-gray-500"
                 >
                     <option value="cricket">Cricket</option>
                     <option value="501">501</option>

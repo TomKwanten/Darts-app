@@ -1,6 +1,7 @@
 import { createContext, useReducer } from "react";
 import { submitTurn501, bustTurn501 } from "../utils/SubmitTurn501.js";
 import { submitTurnCricket } from "../utils/submitTurnCricket";
+import { submitTurnAroundTheClock } from "../utils/SubmitTurnATC.js";
 
 export const GameContext = createContext();
 
@@ -8,6 +9,7 @@ const initialState = {
     players: [],
     gameMode: null,
     finishMultiplier: 2,
+    order: "sequential",
     currentPlayerIndex: 0,
     currentTurn: [],
     winner: null,
@@ -19,6 +21,7 @@ const initialState = {
 const submitHandlers = {
     "501": submitTurn501,
     "cricket": submitTurnCricket,
+    "around-the-clock": submitTurnAroundTheClock,
 };
 
 export default function GameProvider({ children }) {
@@ -31,6 +34,7 @@ export default function GameProvider({ children }) {
                     players: action.payload.players,
                     gameMode: action.payload.gameMode,
                     finishMultiplier: action.payload.finishMultiplier,
+                    order: action.payload.order ?? "sequential",
                 };
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };

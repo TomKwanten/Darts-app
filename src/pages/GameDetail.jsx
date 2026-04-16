@@ -122,7 +122,7 @@ export default function GameDetail() {
                 </div>
                 <Link to="/stats"
                     className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
-                    ← Stats
+                    ‹‹ Stats
                 </Link>
             </div>
 

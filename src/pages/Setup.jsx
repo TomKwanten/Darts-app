@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
 import { getPlayers, createPlayer, deletePlayer, renamePlayer } from "../utils/api";
+import { SEQUENCES } from "../utils/ATCLogic";
 
 const ACCENT_RED = "#cc2200";
 const BOARD_GREEN = "#1a4731";
@@ -9,6 +10,7 @@ const BOARD_GREEN = "#1a4731";
 const MODE_LABELS = {
     cricket: "Cricket",
     "501": "501",
+    "around-the-clock": "Around the Clock",
 };
 
 export default function Setup() {
@@ -23,11 +25,13 @@ export default function Setup() {
     const [renameId, setRenameId] = useState(null);
     const [renameValue, setRenameValue] = useState("");
     const [finishMultiplier, setFinishMultiplier] = useState(2);
+    const [order, setOrder] = useState("sequential");
 
     const navigate = useNavigate();
     const location = useLocation();
     const gameMode = location.state?.gameMode;
     const { dispatch } = useContext(GameContext);
+    const isAroundTheClock = gameMode === "around-the-clock";
 
     // Redirect to home if no game mode was passed
     useEffect(() => {
@@ -93,12 +97,23 @@ export default function Setup() {
         const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
         if (selectedPlayers.length < 2) return;
 
+        const seq = SEQUENCES[order];
+        const firstTarget = seq[0];
+
         const gamePlayers = selectedPlayers.map(player => {
             if (gameMode === "501") {
                 return {
                     id: player.id,
                     name: player.name,
                     score: 501,
+                    darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+                };
+            }
+            if (gameMode === "around-the-clock") {
+                return {
+                    id: player.id,
+                    name: player.name,
+                    target: firstTarget,
                     darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
                 };
             }
@@ -113,7 +128,7 @@ export default function Setup() {
 
         dispatch({
             type: "START_GAME",
-            payload: { players: gamePlayers, gameMode, finishMultiplier },
+            payload: { players: gamePlayers, gameMode, finishMultiplier, order },
         });
         navigate("/game");
     }
@@ -123,7 +138,7 @@ export default function Setup() {
 
             {/* Title */}
             <div className="mb-10 text-center">
-                <div className="text-xs uppercase tracking-[0.4em] text-gray-500 mb-2">
+                <div className="text-xl uppercase tracking-[0.4em] text-gray-500 mb-2">
                     START
                 </div>
                 <h1 className="text-6xl font-black uppercase tracking-tight text-gray-100">
@@ -324,13 +339,48 @@ export default function Setup() {
                     </div>
                 )}
 
+                {/* Around the Clock order option */}
+                {isAroundTheClock && (
+                    <div className="mb-6">
+                        <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                            Order
+                        </label>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setOrder("sequential")}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: order === "sequential" ? BOARD_GREEN : "transparent",
+                                    borderColor: order === "sequential" ? BOARD_GREEN : "#374151",
+                                    color: order === "sequential" ? "white" : "#6b7280",
+                                }}
+                            >
+                                1 ➔ 20
+                            </button>
+                            <button
+                                onClick={() => setOrder("clockwise")}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: order === "clockwise" ? BOARD_GREEN : "transparent",
+                                    borderColor: order === "clockwise" ? BOARD_GREEN : "#374151",
+                                    color: order === "clockwise" ? "white" : "#6b7280",
+                                }}
+                            >
+                                Clockwise
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Start button */}
                 <button
                     onClick={handleStartGame}
                     className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-[0.15em]
                                text-white transition-all duration-200"
                     style={{ backgroundColor: ACCENT_RED }}>
-                    Start Game →
+                    Start Game ➔
                 </button>
             </div>
 
@@ -338,7 +388,7 @@ export default function Setup() {
             <Link to="/"
                 className="mt-8 text-lg uppercase tracking-widest text-gray-400
                            hover:text-gray-400 transition-colors duration-150">
-                ← Back
+               ‹‹ Back
             </Link>
         </div>
     );
