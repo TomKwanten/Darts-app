@@ -26,14 +26,14 @@ export default function Setup() {
     const [renameValue, setRenameValue] = useState("");
     const [finishMultiplier, setFinishMultiplier] = useState(2);
     const [order, setOrder] = useState("sequential");
+    const [solo, setSolo] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
     const gameMode = location.state?.gameMode;
     const { dispatch } = useContext(GameContext);
-    const isAroundTheClock = gameMode === "around-the-clock";
+    const isATC = gameMode === "around-the-clock";
 
-    // Redirect to home if no game mode was passed
     useEffect(() => {
         if (!gameMode) navigate("/", { replace: true });
     }, [gameMode, navigate]);
@@ -51,9 +51,18 @@ export default function Setup() {
     }, []);
 
     function togglePlayer(id) {
-        setSelectedIds(prev =>
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
+        if (isATC && solo) {
+            setSelectedIds(prev => prev.includes(id) ? [] : [id]);
+        } else {
+            setSelectedIds(prev =>
+                prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+            );
+        }
+    }
+
+    function handleSoloToggle(isSolo) {
+        setSolo(isSolo);
+        setSelectedIds([]);
     }
 
     async function handleAddPlayer() {
@@ -95,10 +104,12 @@ export default function Setup() {
 
     function handleStartGame() {
         const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
-        if (selectedPlayers.length < 2) return;
+        const minPlayers = isATC && solo ? 1 : 2;
+        if (selectedPlayers.length < minPlayers) return;
 
         const seq = SEQUENCES[order];
         const firstTarget = seq[0];
+        const resolvedGameMode = isATC && solo ? "around-the-clock-solo" : gameMode;
 
         const gamePlayers = selectedPlayers.map(player => {
             if (gameMode === "501") {
@@ -109,7 +120,7 @@ export default function Setup() {
                     darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
                 };
             }
-            if (gameMode === "around-the-clock") {
+            if (isATC) {
                 return {
                     id: player.id,
                     name: player.name,
@@ -128,10 +139,12 @@ export default function Setup() {
 
         dispatch({
             type: "START_GAME",
-            payload: { players: gamePlayers, gameMode, finishMultiplier, order },
+            payload: { players: gamePlayers, gameMode: resolvedGameMode, finishMultiplier, order, solo },
         });
         navigate("/game");
     }
+
+    const canStart = selectedIds.length >= (isATC && solo ? 1 : 2);
 
     return (
         <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4 py-12">
@@ -161,6 +174,7 @@ export default function Setup() {
                             type="text"
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") handleAddPlayer(); }}
                             placeholder="Enter name..."
                             className="flex-1 rounded-lg bg-gray-800 border border-gray-700 text-gray-100
                                        px-3 py-2 text-sm placeholder-gray-600
@@ -183,11 +197,46 @@ export default function Setup() {
                     <p className="text-xs text-red-400 mb-4">{error}</p>
                 )}
 
+                {/* ATC: Solo / Multiplayer toggle */}
+                {isATC && (
+                    <div className="mb-5">
+                        <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                            Mode
+                        </label>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleSoloToggle(false)}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: !solo ? BOARD_GREEN : "transparent",
+                                    borderColor: !solo ? BOARD_GREEN : "#374151",
+                                    color: !solo ? "white" : "#6b7280",
+                                }}
+                            >
+                                Multiplayer
+                            </button>
+                            <button
+                                onClick={() => handleSoloToggle(true)}
+                                className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                           border transition-all duration-150"
+                                style={{
+                                    backgroundColor: solo ? BOARD_GREEN : "transparent",
+                                    borderColor: solo ? BOARD_GREEN : "#374151",
+                                    color: solo ? "white" : "#6b7280",
+                                }}
+                            >
+                                Solo
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Player list */}
                 <div className="mb-6">
                     <div className="flex items-center justify-between mb-2">
                         <label className="text-xs uppercase tracking-widest text-gray-500">
-                            Select Players
+                            {isATC && solo ? "Select Player" : "Select Players"}
                         </label>
                         {allPlayers.length > 0 && (
                             <button
@@ -292,7 +341,7 @@ export default function Setup() {
                                                 {!editMode && isSelected && (
                                                     <span className="text-xs font-black uppercase tracking-wider"
                                                         style={{ color: "#22c55e" }}>
-                                                        ✓ Playing
+                                                        ✓ {solo ? "Selected" : "Playing"}
                                                     </span>
                                                 )}
                                             </>
@@ -339,8 +388,8 @@ export default function Setup() {
                     </div>
                 )}
 
-                {/* Around the Clock order option */}
-                {isAroundTheClock && (
+                {/* ATC order option */}
+                {isATC && (
                     <div className="mb-6">
                         <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
                             Order
@@ -377,8 +426,9 @@ export default function Setup() {
                 {/* Start button */}
                 <button
                     onClick={handleStartGame}
+                    disabled={!canStart}
                     className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-[0.15em]
-                               text-white transition-all duration-200"
+                               text-white transition-all duration-200 disabled:opacity-40"
                     style={{ backgroundColor: ACCENT_RED }}>
                     Start Game ➔
                 </button>
@@ -388,7 +438,7 @@ export default function Setup() {
             <Link to="/"
                 className="mt-8 text-lg uppercase tracking-widest text-gray-400
                            hover:text-gray-400 transition-colors duration-150">
-               ‹‹ Back
+                ‹‹ Back
             </Link>
         </div>
     );

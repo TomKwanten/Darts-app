@@ -53,7 +53,6 @@ export default function Numpad() {
 
     if (gameMode === "501") return <Numpad501 dartCounter={dartCounter} undoSubmit={undoSubmit} />;
     if (gameMode === "cricket") return <NumpadCricket dartCounter={dartCounter} undoSubmit={undoSubmit} />;
-    if (gameMode === "around-the-clock") return <NumpadAroundTheClock dartCounter={dartCounter} undoSubmit={undoSubmit} />;
-
+    if (gameMode === "around-the-clock" || gameMode === "around-the-clock-solo") return <NumpadAroundTheClock dartCounter={dartCounter} undoSubmit={undoSubmit} />;
     return null;
 }

@@ -18,14 +18,14 @@ export default function PlayerCardAroundTheClock({ player, isActive, order, curr
         <div className="flex flex-col items-center gap-1 py-1">
             {/* Current target */}
             <span
-                className="text-5xl font-black tabular-nums transition-all duration-150"
+                className="text-4xl font-black tabular-nums transition-all duration-150"
                 style={{ color: isActive ? (isLive ? "#22c55e" : "#cc2200") : "#9ca3af" }}>
                 {targetLabel}
             </span>
 
             {/* Progress bar */}
             <div className="w-full rounded-full overflow-hidden"
-                style={{ height: "8px", backgroundColor: "#1f2937" }}>
+                style={{ height: "6px", backgroundColor: "#1f2937" }}>
                 <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
@@ -36,7 +36,7 @@ export default function PlayerCardAroundTheClock({ player, isActive, order, curr
             </div>
 
             {/* Progress label */}
-            <span className="text-[15px] uppercase tracking-widest tabular-nums"
+            <span className="text-[10px] uppercase tracking-widest tabular-nums"
                 style={{ color: "#4b5563" }}>
                 {completed}/{total - 1}
             </span>

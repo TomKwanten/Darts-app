@@ -10,6 +10,7 @@ const initialState = {
     gameMode: null,
     finishMultiplier: 2,
     order: "sequential",
+    solo: false,
     currentPlayerIndex: 0,
     currentTurn: [],
     winner: null,
@@ -22,6 +23,7 @@ const submitHandlers = {
     "501": submitTurn501,
     "cricket": submitTurnCricket,
     "around-the-clock": submitTurnAroundTheClock,
+    "around-the-clock-solo": submitTurnAroundTheClock,
 };
 
 export default function GameProvider({ children }) {
@@ -35,6 +37,7 @@ export default function GameProvider({ children }) {
                     gameMode: action.payload.gameMode,
                     finishMultiplier: action.payload.finishMultiplier,
                     order: action.payload.order ?? "sequential",
+                    solo: action.payload.solo ?? false,
                 };
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };

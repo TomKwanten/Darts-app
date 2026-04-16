@@ -29,6 +29,7 @@ export function submitTurnCricket(state) {
         );
         const newDarts = { ...player.darts };
         for (const dart of state.currentTurn) {
+            if (dart.number === 0) continue; // skip miss darts
             newDarts.total += 1;
             if (dart.multiplier === 1) newDarts.singles += 1;
             if (dart.multiplier === 2) newDarts.doubles += 1;

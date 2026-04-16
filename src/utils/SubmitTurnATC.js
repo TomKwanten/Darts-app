@@ -24,11 +24,14 @@ export function submitTurnAroundTheClock(state) {
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of state.currentTurn) {
+        if (dart.number === 0) continue; // skip miss darts
         newDarts.total += 1;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;
     }
+
+    const realDarts = state.currentTurn.filter(d => d.number !== 0);
 
     const updatedPlayers = state.players.map((player, index) => {
         if (index !== state.currentPlayerIndex) return player;
@@ -38,11 +41,11 @@ export function submitTurnAroundTheClock(state) {
     const turnData = {
         player_id: currentPlayer.id,
         turn_number: state.turnNumber,
-        points_scored: newTarget !== currentPlayer.target ? 1 : 0, // 1 = advanced, 0 = missed
+        points_scored: newTarget !== currentPlayer.target ? 1 : 0,
         running_total: newTarget,
-        singles: state.currentTurn.filter(d => d.multiplier === 1).length,
-        doubles: state.currentTurn.filter(d => d.multiplier === 2).length,
-        triples: state.currentTurn.filter(d => d.multiplier === 3).length,
+        singles: realDarts.filter(d => d.multiplier === 1).length,
+        doubles: realDarts.filter(d => d.multiplier === 2).length,
+        triples: realDarts.filter(d => d.multiplier === 3).length,
     };
 
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;

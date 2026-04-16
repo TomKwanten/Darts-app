@@ -23,6 +23,7 @@ export function submitTurn501(state) {
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of state.currentTurn) {
+        if (dart.number === 0) continue; // skip miss darts
         newDarts.total += 1;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
@@ -35,15 +36,16 @@ export function submitTurn501(state) {
     });
 
     const pointsScored = bust ? 0 : currentPlayer.score - finalScore;
+    const realDarts = state.currentTurn.filter(d => d.number !== 0);
 
     const turnData = {
         player_id: currentPlayer.id,
         turn_number: state.turnNumber,
         points_scored: pointsScored,
         running_total: finalScore,
-        singles: state.currentTurn.filter(d => d.multiplier === 1).length,
-        doubles: state.currentTurn.filter(d => d.multiplier === 2).length,
-        triples: state.currentTurn.filter(d => d.multiplier === 3).length,
+        singles: realDarts.filter(d => d.multiplier === 1).length,
+        doubles: realDarts.filter(d => d.multiplier === 2).length,
+        triples: realDarts.filter(d => d.multiplier === 3).length,
     };
 
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
@@ -85,6 +87,7 @@ export function bustTurn501(state) {
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of filledTurn) {
+        if (dart.number === 0) continue; // skip miss darts
         newDarts.total += 1;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
@@ -96,14 +99,16 @@ export function bustTurn501(state) {
         return { ...player, score: currentPlayer.score, darts: newDarts };
     });
 
+    const realDarts = filledTurn.filter(d => d.number !== 0);
+
     const turnData = {
         player_id: currentPlayer.id,
         turn_number: state.turnNumber,
         points_scored: 0,
         running_total: currentPlayer.score,
-        singles: filledTurn.filter(d => d.multiplier === 1).length,
-        doubles: filledTurn.filter(d => d.multiplier === 2).length,
-        triples: filledTurn.filter(d => d.multiplier === 3).length,
+        singles: realDarts.filter(d => d.multiplier === 1).length,
+        doubles: realDarts.filter(d => d.multiplier === 2).length,
+        triples: realDarts.filter(d => d.multiplier === 3).length,
     };
 
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;

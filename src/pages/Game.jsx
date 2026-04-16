@@ -9,26 +9,24 @@ import { getProgressIndex } from "../utils/ATCLogic";
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
 
 function computeRanks(players, gameMode, order) {
+    const isATC = gameMode === "around-the-clock" || gameMode === "around-the-clock-solo";
+
     const sorted = [...players].sort((a, b) => {
         if (gameMode === "501") {
-            return a.score - b.score; // lower remaining = better
+            return a.score - b.score;
         }
-        if (gameMode === "around-the-clock") {
-            // Higher progress index = further along = better rank
+        if (isATC) {
             const progA = getProgressIndex(a.target, order ?? "sequential");
             const progB = getProgressIndex(b.target, order ?? "sequential");
             if (progB !== progA) return progB - progA;
-            // Tiebreak: fewer total darts used = better
             return a.darts.total - b.darts.total;
         }
-        // Cricket: points desc, then closed numbers desc
         if (b.points !== a.points) return b.points - a.points;
         const closedA = NUMBERS.filter(n => a.marks[n] === 3).length;
         const closedB = NUMBERS.filter(n => b.marks[n] === 3).length;
         return closedB - closedA;
     });
 
-    // Build rank map — ties get the same rank
     const rankMap = {};
     sorted.forEach((player, i) => {
         if (i === 0) {
@@ -38,7 +36,7 @@ function computeRanks(players, gameMode, order) {
             let isTie = false;
             if (gameMode === "501") {
                 isTie = player.score === prev.score;
-            } else if (gameMode === "around-the-clock") {
+            } else if (isATC) {
                 isTie = getProgressIndex(player.target, order ?? "sequential") === getProgressIndex(prev.target, order ?? "sequential")
                     && player.darts.total === prev.darts.total;
             } else {
@@ -56,11 +54,12 @@ function computeRanks(players, gameMode, order) {
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order, solo } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
     const isGameInProgress = players.length > 0 && !winner;
+    const isSolo = gameMode === "around-the-clock-solo";
 
     const blocker = useBlocker(isGameInProgress);
 
@@ -93,7 +92,7 @@ export default function Game() {
                 <p className="text-gray-500 text-sm uppercase tracking-widest">No game in progress</p>
                 <Link to="/"
                     className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
-                    ← Back to setup
+                    ‹‹ Back to setup
                 </Link>
             </div>
         );
@@ -103,6 +102,7 @@ export default function Game() {
         "501": "501",
         "cricket": "Cricket",
         "around-the-clock": "Around the Clock",
+        "around-the-clock-solo": "Around the Clock",
     }[gameMode] ?? gameMode;
 
     return (
@@ -139,9 +139,14 @@ export default function Game() {
 
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0">
-                <h1 className="text-xl font-black uppercase tracking-tight text-gray-100">
-                    {gameModeLabel}
-                </h1>
+                <div>
+                    <h1 className="text-xl font-black uppercase tracking-tight text-gray-100">
+                        {gameModeLabel}
+                    </h1>
+                    {isSolo && (
+                        <span className="text-[10px] uppercase tracking-widest text-gray-600">Solo</span>
+                    )}
+                </div>
                 <Link to="/stats"
                     className="text-sm uppercase tracking-widest text-gray-400 hover:text-gray-400 transition-colors">
                     Stats ➔
@@ -152,11 +157,18 @@ export default function Game() {
             {winner && (
                 <div className="rounded-xl border p-3 text-center flex-shrink-0"
                     style={{ borderColor: "#cc2200", backgroundColor: "#1a0500" }}>
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Winner</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
+                        {isSolo ? "Finished!" : "Winner"}
+                    </p>
                     <h2 className="text-2xl font-black uppercase tracking-tight"
                         style={{ color: "#cc2200" }}>
                         {winner.name}
                     </h2>
+                    {isSolo && (
+                        <p className="text-sm text-gray-400 mt-1">
+                            {winner.finalPlayers[0]?.darts.total} darts
+                        </p>
+                    )}
                     <button
                         onClick={() => { dispatch({ type: "RESET_GAME" }); setSaveError(false); Navigate("/"); }}
                         className="mt-2 px-5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white"
@@ -171,7 +183,7 @@ export default function Game() {
                 </div>
             )}
 
-            {/* Player cards — horizontal scroll for 5+ players */}
+            {/* Player cards */}
             <div className="flex gap-2 flex-shrink-0 overflow-x-auto pb-1"
                 style={{ scrollSnapType: "x mandatory" }}>
                 {players.map((player, index) => (
@@ -189,7 +201,7 @@ export default function Game() {
                             gameMode={gameMode}
                             currentTurn={index === currentPlayerIndex ? currentTurn : []}
                             players={players}
-                            rank={rankMap[player.name]}
+                            rank={isSolo ? null : rankMap[player.name]}
                             finishMultiplier={finishMultiplier}
                             order={order}
                         />
@@ -197,7 +209,7 @@ export default function Game() {
                 ))}
             </div>
 
-            {/* Numpad — takes remaining space */}
+            {/* Numpad */}
             <div className="flex-1 min-h-0">
                 <Numpad />
             </div>

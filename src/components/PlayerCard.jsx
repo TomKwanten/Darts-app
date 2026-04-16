@@ -89,7 +89,7 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                     finishMultiplier={finishMultiplier}
                 />
             )}
-            {gameMode === "around-the-clock" && (
+            {(gameMode === "around-the-clock" || gameMode === "around-the-clock-solo") && (
                 <PlayerCardAroundTheClock
                     player={player}
                     isActive={isActive}
