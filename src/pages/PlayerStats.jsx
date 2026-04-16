@@ -12,6 +12,7 @@ function calculateCricketStats(games, playerId) {
 
     let wins = 0, totalDarts = 0, totalPoints = 0;
     let totalSingles = 0, totalDoubles = 0, totalTriples = 0;
+    let totalGreenBulls = 0, totalRedBulls = 0;
     let bestGameDarts = null, playerName = null;
 
     for (const game of playerGames) {
@@ -27,6 +28,8 @@ function calculateCricketStats(games, playerId) {
         totalSingles += player.singles;
         totalDoubles += player.doubles;
         totalTriples += player.triples;
+        totalGreenBulls += player.green_bulls ?? 0;
+        totalRedBulls += player.red_bulls ?? 0;
     }
 
     const gamesPlayed = playerGames.length;
@@ -43,6 +46,8 @@ function calculateCricketStats(games, playerId) {
         totalDoubles, doublesPercent: totalDarts > 0 ? (totalDoubles / totalDarts) * 100 : 0,
         totalTriples, triplesPercent: totalDarts > 0 ? (totalTriples / totalDarts) * 100 : 0,
         bestGameDarts,
+        totalGreenBulls,
+        totalRedBulls,
     };
 }
 
@@ -55,6 +60,7 @@ function calculate501Stats(games, playerId) {
 
     let wins = 0, totalDartsWins = 0, bestGameDarts = null;
     let totalPointsNonBust = 0, totalNonBustTurns = 0, playerName = null;
+    let totalGreenBulls = 0, totalRedBulls = 0;
 
     for (const game of playerGames) {
         const player = game.players.find(p => p.id === playerId);
@@ -72,6 +78,8 @@ function calculate501Stats(games, playerId) {
                 totalNonBustTurns++;
             }
         }
+        totalGreenBulls += player.green_bulls ?? 0;
+        totalRedBulls += player.red_bulls ?? 0;
     }
 
     const gamesPlayed = playerGames.length;
@@ -82,15 +90,15 @@ function calculate501Stats(games, playerId) {
         avgDartsPerWin: wins > 0 ? totalDartsWins / wins : null,
         bestGameDarts,
         avgPerTurn: totalNonBustTurns > 0 ? totalPointsNonBust / totalNonBustTurns : null,
+        totalGreenBulls,
+        totalRedBulls,
     };
 }
 
 function calculateATCStats(games, playerId) {
-    // Multiplayer
     const mpGames = games.filter(g =>
         g.game_mode === "around-the-clock" && g.players.some(p => p.id === playerId)
     );
-    // Solo
     const soloGames = games.filter(g =>
         g.game_mode === "around-the-clock-solo" && g.players.some(p => p.id === playerId)
     );
@@ -99,7 +107,6 @@ function calculateATCStats(games, playerId) {
 
     let playerName = null;
 
-    // ── Multiplayer stats ──
     let mpWins = 0, mpTotalDarts = 0, mpTotalDartsWins = 0;
     let mpSingles = 0, mpDoubles = 0, mpTriples = 0;
     let mpTotalHits = 0, mpBestDarts = null;
@@ -118,16 +125,14 @@ function calculateATCStats(games, playerId) {
         mpDoubles += player.doubles;
         mpTriples += player.triples;
 
-        // hits = steps advanced across all turns (running_total progression)
         const playerTurns = game.turns
             .filter(t => t.player_id === playerId)
             .sort((a, b) => a.turn_number - b.turn_number);
         for (const turn of playerTurns) {
-            mpTotalHits += turn.points_scored; // points_scored = 1 if advanced, 0 if missed
+            mpTotalHits += turn.points_scored;
         }
     }
 
-    // ── Solo stats ──
     let soloRuns = 0, soloTotalDarts = 0;
     let soloSingles = 0, soloDoubles = 0, soloTriples = 0;
     let soloTotalHits = 0, soloBestDarts = null, soloCompletedDarts = 0, soloCompleted = 0;
@@ -167,7 +172,7 @@ function calculateATCStats(games, playerId) {
             singles: mpSingles,
             doubles: mpDoubles,
             triples: mpTriples,
-            hitRate: mpTotalDarts > 0 ? ((mpSingles + mpDoubles + mpTriples) / mpTotalDarts) * 100 : 0,        
+            hitRate: mpTotalDarts > 0 ? ((mpSingles + mpDoubles + mpTriples) / mpTotalDarts) * 100 : 0,
         },
         solo: soloGames.length === 0 ? null : {
             runs: soloRuns,
@@ -206,23 +211,28 @@ function StatGrid({ items }) {
     );
 }
 
-function RecordRow({ wins, losses, played, color = "#cc2200" }) {
+function BullsCard({ greenBulls, redBulls }) {
     return (
-        <div className="flex gap-4">
-            {[
-                { label: "Wins", value: wins, color },
-                { label: "Losses", value: losses, color: null },
-                { label: "Played", value: played, color: null },
-            ].map(({ label, value, color: c }) => (
-                <div key={label} className="flex-1 text-center rounded-lg bg-gray-800 py-3">
-                    <div className="text-2xl font-black" style={{ color: c ?? undefined }}
-                        className={`text-2xl font-black ${c ? "" : "text-gray-100"}`}>
-                        {value}
+        <StatCard title="Bulls">
+            <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-gray-800 py-3 px-4">
+                    <div className="text-xl font-black tabular-nums text-gray-100">{greenBulls}</div>
+                    <div className="flex items-center gap-1 mt-1">
+                        <span className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: "#22c55e" }} />
+                        <span className="text-[9px] uppercase tracking-wider text-gray-500">Green Bull</span>
                     </div>
-                    <div className="text-[9px] uppercase tracking-wider text-gray-500 mt-1">{label}</div>
                 </div>
-            ))}
-        </div>
+                <div className="rounded-lg bg-gray-800 py-3 px-4">
+                    <div className="text-xl font-black tabular-nums text-gray-100">{redBulls}</div>
+                    <div className="flex items-center gap-1 mt-1">
+                        <span className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: "#cc2200" }} />
+                        <span className="text-[9px] uppercase tracking-wider text-gray-500">Red Bull</span>
+                    </div>
+                </div>
+            </div>
+        </StatCard>
     );
 }
 
@@ -349,6 +359,10 @@ export default function PlayerStats() {
                             { label: "Triples", value: `${cricketStats.totalTriples} (${cricketStats.triplesPercent.toFixed(1)}%)` },
                         ]} />
                     </StatCard>
+                    <BullsCard
+                        greenBulls={cricketStats.totalGreenBulls}
+                        redBulls={cricketStats.totalRedBulls}
+                    />
                     <StatCard title="Best Game">
                         <div className="rounded-lg bg-gray-800 py-3 px-4">
                             {cricketStats.bestGameDarts !== null ? (
@@ -404,6 +418,10 @@ export default function PlayerStats() {
                                 { label: "Checkout rate", value: `${s.checkoutRate.toFixed(1)}%` },
                             ]} />
                         </StatCard>
+                        <BullsCard
+                            greenBulls={s.totalGreenBulls}
+                            redBulls={s.totalRedBulls}
+                        />
                         <StatCard title="Best Game">
                             <div className="rounded-lg bg-gray-800 py-3 px-4">
                                 {s.bestGameDarts !== null ? (
@@ -432,11 +450,9 @@ export default function PlayerStats() {
             {gameMode === "around-the-clock" && atcStats && (
                 <div className="flex flex-col gap-4">
 
-                    {/* Multiplayer */}
                     {atcStats.multiplayer && (
                         <>
                             <div className="text-xs uppercase tracking-[0.3em] text-gray-600 mt-1">Multiplayer</div>
-
                             <StatCard title="Record">
                                 <div className="flex gap-4">
                                     {[
@@ -452,7 +468,6 @@ export default function PlayerStats() {
                                     ))}
                                 </div>
                             </StatCard>
-
                             <StatCard title="Performance">
                                 <StatGrid items={[
                                     { label: "Hit rate", value: `${atcStats.multiplayer.hitRate.toFixed(1)}%` },
@@ -461,7 +476,6 @@ export default function PlayerStats() {
                                     { label: "Best game", value: atcStats.multiplayer.bestDarts != null ? `${atcStats.multiplayer.bestDarts}` : "—" },
                                 ]} />
                             </StatCard>
-
                             <StatCard title="Dart Types">
                                 <StatGrid items={[
                                     { label: "Singles", value: atcStats.multiplayer.singles },
@@ -472,11 +486,9 @@ export default function PlayerStats() {
                         </>
                     )}
 
-                    {/* Solo */}
                     {atcStats.solo && (
                         <>
                             <div className="text-xs uppercase tracking-[0.3em] text-gray-600 mt-2">Solo</div>
-
                             <StatCard title="Runs">
                                 <div className="flex gap-4">
                                     {[
@@ -491,7 +503,6 @@ export default function PlayerStats() {
                                     ))}
                                 </div>
                             </StatCard>
-
                             <StatCard title="Performance">
                                 <StatGrid items={[
                                     { label: "Hit rate", value: `${atcStats.solo.hitRate.toFixed(1)}%` },
@@ -501,7 +512,6 @@ export default function PlayerStats() {
                                     { label: "Total darts", value: atcStats.solo.totalDarts },
                                 ]} />
                             </StatCard>
-
                             <StatCard title="Dart Types">
                                 <StatGrid items={[
                                     { label: "Singles", value: atcStats.solo.singles },

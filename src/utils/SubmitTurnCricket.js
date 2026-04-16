@@ -28,12 +28,15 @@ export function submitTurnCricket(state) {
             player.marks
         );
         const newDarts = { ...player.darts };
+        const newBulls = { ...player.bulls };
         for (const dart of state.currentTurn) {
             if (dart.number === 0) continue; // skip miss darts
             newDarts.total += 1;
             if (dart.multiplier === 1) newDarts.singles += 1;
             if (dart.multiplier === 2) newDarts.doubles += 1;
             if (dart.multiplier === 3) newDarts.triples += 1;
+            if (dart.number === 25 && dart.multiplier === 1) newBulls.green += 1;
+            if (dart.number === 25 && dart.multiplier === 2) newBulls.red += 1;
         }
 
         currentPlayerTurnData = {
@@ -51,6 +54,7 @@ export function submitTurnCricket(state) {
             marks: newMarks,
             points: player.points + earnedPoints,
             darts: newDarts,
+            bulls: newBulls,
         };
     });
 

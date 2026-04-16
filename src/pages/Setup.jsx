@@ -104,12 +104,7 @@ export default function Setup() {
 
     function handleStartGame() {
         const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
-        const minPlayers = isATC && solo ? 1 : 2;
-        if (selectedPlayers.length < minPlayers) return;
-
-        const seq = SEQUENCES[order];
-        const firstTarget = seq[0];
-        const resolvedGameMode = isATC && solo ? "around-the-clock-solo" : gameMode;
+        if (selectedPlayers.length < 2) return;
 
         const gamePlayers = selectedPlayers.map(player => {
             if (gameMode === "501") {
@@ -118,14 +113,7 @@ export default function Setup() {
                     name: player.name,
                     score: 501,
                     darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
-                };
-            }
-            if (isATC) {
-                return {
-                    id: player.id,
-                    name: player.name,
-                    target: firstTarget,
-                    darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+                    bulls: { green: 0, red: 0 },
                 };
             }
             return {
@@ -134,12 +122,13 @@ export default function Setup() {
                 marks: { 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 25: 0 },
                 points: 0,
                 darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+                bulls: { green: 0, red: 0 },
             };
         });
 
         dispatch({
             type: "START_GAME",
-            payload: { players: gamePlayers, gameMode: resolvedGameMode, finishMultiplier, order, solo },
+            payload: { players: gamePlayers, gameMode, finishMultiplier },
         });
         navigate("/game");
     }

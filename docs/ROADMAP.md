@@ -48,25 +48,26 @@
       - Singles / doubles / triples tracked per player on card
       - Player stats page: multiplayer W/L/record + solo runs/completions, hit rate, best game, avg darts
 - [x] Bug fix: miss darts (number: 0) no longer counted as singles in any game mode
+- [x] Bull stat — green bull (single) and red bull (double) tracked in all game modes
+      - Stored in DB (green_bulls / red_bulls columns on game_player)
+      - Shown as a Bulls card on the player stats page for Cricket and 501
 
 ## Bugs
 
 ## Up Next
-- [ ] Bull stat — track red bull (single) vs green bull (double) per player; show lifetime count in PlayerStats
 - [ ] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
 
 ## Stats & Features
-- [ ] Per-gamemode stats filtering on main Stats page
-- [ ] Shanghai game mode
 - [ ] Overall stats section on player detail page
+- [ ] Per-gamemode stats filtering on main Stats page
+
+## Future Game Modes
+- [ ] Shanghai
+- [ ] Halve It
+- [ ] Score Training
 
 ## Nice to Have
 - [ ] All game modes: "Best throw last round" highlight — show which player threw the highest score in the previous round
-
-## Future Game Modes
-- [ ] Score Training
-- [ ] Shanghai
-- [ ] Halve It
 
 ## Someday / Maybe
 - [ ] Hosting (Laravel + React op publieke URL)
