@@ -55,6 +55,7 @@ export function submitTurnCricket(state) {
             points: player.points + earnedPoints,
             darts: newDarts,
             bulls: newBulls,
+            gepikt: player.gepikt ?? 0,
         };
     });
 

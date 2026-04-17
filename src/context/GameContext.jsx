@@ -33,7 +33,7 @@ export default function GameProvider({ children }) {
             case "START_GAME":
                 return {
                     ...state,
-                    players: action.payload.players,
+                    players: action.payload.players.map(p => ({ ...p, gepikt: 0})),
                     gameMode: action.payload.gameMode,
                     finishMultiplier: action.payload.finishMultiplier,
                     order: action.payload.order ?? "sequential",
@@ -68,6 +68,18 @@ export default function GameProvider({ children }) {
             case "SUBMIT_TURN": {
                 const handler = submitHandlers[state.gameMode];
                 return handler(state);
+            }
+            case "GEPIKT": {
+                if (state.currentTurn.length === 0) return state;
+                const updatedTurn = state.currentTurn.map((dart, i) =>
+                    i === state.currentTurn.length - 1 ? { ...dart, gepikt: true } : dart
+                );
+                const updatedPlayers = state.players.map((player, i) =>
+                    i === state.currentPlayerIndex
+                        ? { ...player, gepikt: (player.gepikt ?? 0) + 1 }
+                        : player
+                );
+                return { ...state, currentTurn: updatedTurn, players: updatedPlayers };
             }
             case "RESET_GAME":
                 return initialState;

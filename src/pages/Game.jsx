@@ -77,6 +77,7 @@ export default function Game() {
                 triples: player.darts.triples,
                 green_bulls: player.bulls?.green ?? 0,
                 red_bulls: player.bulls?.red ?? 0,
+                gepikt: player.gepikt ?? 0,
             })),
             turns: turns,
         };

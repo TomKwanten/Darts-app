@@ -24,8 +24,8 @@ export default function NumpadCricket({ dartCounter, undoSubmit }) {
         dispatch({ type: "MISS_TURN" });
     }
 
-    const missButton = (
-        <div className="flex-shrink-0 pt-1">
+    const missAndGepikt = (
+        <div className="grid grid-cols-2 gap-2 flex-shrink-0 pt-1">
             <button
                 onClick={handleMiss}
                 disabled={turnFull}
@@ -33,6 +33,14 @@ export default function NumpadCricket({ dartCounter, undoSubmit }) {
                            transition-all duration-150 active:scale-95 disabled:opacity-25"
                 style={{ backgroundColor: "#78350f", color: "#fbbf24" }}>
                 Miss
+            </button>
+            <button
+                onClick={() => dispatch({ type: "GEPIKT" })}
+                disabled={dartsThisTurn === 0}
+                className="w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider
+                           transition-all duration-150 active:scale-95 disabled:opacity-25"
+                style={{ backgroundColor: "#1e1b4b", color: "#a78bfa" }}>
+                Gepikt 🎯
             </button>
         </div>
     );
@@ -80,7 +88,7 @@ export default function NumpadCricket({ dartCounter, undoSubmit }) {
                 ))}
             </div>
 
-            {missButton}
+            {missAndGepikt}
             {undoSubmit}
         </div>
     );

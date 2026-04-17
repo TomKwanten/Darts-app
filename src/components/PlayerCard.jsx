@@ -34,7 +34,7 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                 </span>
             </div>
 
-            {/* Row 2: Rank + points */}
+            {/* Row 2: Rank + points + gepikt */}
             <div className="flex items-center justify-between px-0.5 mb-1">
                 {rank && (
                     <span
@@ -44,9 +44,17 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                     </span>
                 )}
                 {gameMode === "cricket" && (
-                    <span className="text-sm font-black tabular-nums ml-auto" style={{ color: "#cc2200" }}>
-                        {player.points}
-                    </span>
+                    <div className="flex items-center gap-2 ml-auto">
+                        {player.gepikt > 0 && (
+                            <span className="text-[10px] font-black uppercase tracking-wide"
+                                style={{ color: "#a78bfa" }}>
+                                🎯 {player.gepikt}
+                            </span>
+                        )}
+                        <span className="text-sm font-black tabular-nums" style={{ color: "#cc2200" }}>
+                            {player.points}
+                        </span>
+                    </div>
                 )}
             </div>
 
@@ -63,8 +71,12 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                             key={i}
                             className="flex-1 rounded-md text-center text-[11px] font-black uppercase tracking-wide py-[2px] transition-all duration-150 min-w-0"
                             style={{
-                                backgroundColor: dart ? "#1a4731" : (isActive ? "#1f2937" : "transparent"),
-                                color: dart ? "#86efac" : "transparent",
+                                backgroundColor: dart
+                                    ? (dart.gepikt ? "#78350f" : "#1a4731")
+                                    : (isActive ? "#1f2937" : "transparent"),
+                                color: dart
+                                    ? (dart.gepikt ? "#fbbf24" : "#86efac")
+                                    : "transparent",
                             }}>
                             {dart ? dartLabel(dart) : "·"}
                         </div>
