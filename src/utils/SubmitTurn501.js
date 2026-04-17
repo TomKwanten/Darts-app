@@ -25,6 +25,7 @@ export function submitTurn501(state) {
     const newBulls = { ...currentPlayer.bulls };
     for (const dart of state.currentTurn) {
         newDarts.total += 1;
+        if (dart.number === 0) continue;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;
@@ -44,7 +45,7 @@ export function submitTurn501(state) {
         turn_number: state.turnNumber,
         points_scored: pointsScored,
         running_total: finalScore,
-        singles: state.currentTurn.filter(d => d.multiplier === 1).length,
+        singles: state.currentTurn.filter(d => d.multiplier === 1 && d.number !== 0).length,
         doubles: state.currentTurn.filter(d => d.multiplier === 2).length,
         triples: state.currentTurn.filter(d => d.multiplier === 3).length,
     };
@@ -90,6 +91,7 @@ export function bustTurn501(state) {
     const newBulls = { ...currentPlayer.bulls };
     for (const dart of filledTurn) {
         newDarts.total += 1;
+        if (dart.number === 0) continue;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;
@@ -107,7 +109,7 @@ export function bustTurn501(state) {
         turn_number: state.turnNumber,
         points_scored: 0,
         running_total: currentPlayer.score,
-        singles: filledTurn.filter(d => d.multiplier === 1).length,
+        singles: filledTurn.filter(d => d.multiplier === 1 && d.number !== 0).length,
         doubles: filledTurn.filter(d => d.multiplier === 2).length,
         triples: filledTurn.filter(d => d.multiplier === 3).length,
     };
