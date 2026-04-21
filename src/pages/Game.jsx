@@ -21,6 +21,10 @@ function computeRanks(players, gameMode, order) {
             if (progB !== progA) return progB - progA;
             return a.darts.total - b.darts.total;
         }
+        if (gameMode === "shanghai") {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.darts.total - b.darts.total;
+        }
         if (b.points !== a.points) return b.points - a.points;
         const closedA = NUMBERS.filter(n => a.marks[n] === 3).length;
         const closedB = NUMBERS.filter(n => b.marks[n] === 3).length;
@@ -39,6 +43,8 @@ function computeRanks(players, gameMode, order) {
             } else if (isATC) {
                 isTie = getProgressIndex(player.target, order ?? "sequential") === getProgressIndex(prev.target, order ?? "sequential")
                     && player.darts.total === prev.darts.total;
+            } else if (gameMode === "shanghai") {
+                isTie = player.score === prev.score && player.darts.total === prev.darts.total;
             } else {
                 const samePoints = player.points === prev.points;
                 const sameClosed = NUMBERS.filter(n => player.marks[n] === 3).length ===
@@ -54,7 +60,7 @@ function computeRanks(players, gameMode, order) {
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order, solo } = gameState;
+    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order, solo, round } = gameState;
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
@@ -70,7 +76,11 @@ export default function Game() {
             game_mode: gameMode,
             players: winner.finalPlayers.map(player => ({
                 id: player.id,
-                points: gameMode === "501" ? (501 - player.score) : (player.points ?? 0),
+                points: gameMode === "shanghai"
+                    ? player.score
+                    : gameMode === "501"
+                        ? (501 - player.score)
+                        : (player.points ?? 0),
                 total_darts: player.darts.total,
                 singles: player.darts.singles,
                 doubles: player.darts.doubles,
@@ -78,6 +88,7 @@ export default function Game() {
                 green_bulls: player.bulls?.green ?? 0,
                 red_bulls: player.bulls?.red ?? 0,
                 gepikt: player.gepikt ?? 0,
+                shanghais: player.shanghais ?? 0,
             })),
             turns: turns,
         };
@@ -106,6 +117,7 @@ export default function Game() {
         "cricket": "Cricket",
         "around-the-clock": "Around the Clock",
         "around-the-clock-solo": "Around the Clock",
+        "shanghai": "Shanghai",
     }[gameMode] ?? gameMode;
 
     return (
@@ -163,6 +175,12 @@ export default function Game() {
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
                         {isSolo ? "Finished!" : "Winner"}
                     </p>
+                    {winner?.isShanghai && (
+                        <p className="text-xs font-black uppercase tracking-[0.2em]"
+                            style={{ color: "#f59e0b" }}>
+                            Shanghai!
+                        </p>
+                    )}
                     <h2 className="text-2xl font-black uppercase tracking-tight"
                         style={{ color: "#cc2200" }}>
                         {winner.name}
@@ -207,6 +225,7 @@ export default function Game() {
                             rank={isSolo ? null : rankMap[player.name]}
                             finishMultiplier={finishMultiplier}
                             order={order}
+                            round={round}
                         />
                     </div>
                 ))}

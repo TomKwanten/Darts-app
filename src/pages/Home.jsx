@@ -22,6 +22,12 @@ const GAME_MODES = [
         description: "Hit 1 through 20 then Bull, in order. First to finish wins.",
         available: true,
     },
+    {
+        id: "shanghai",
+        label: "Shanghai",
+        description: "Hit each number in turn. Score points — or bag a Shanghai for an instant win.",
+        available: true,
+    },
 ];
 
 export default function Home() {

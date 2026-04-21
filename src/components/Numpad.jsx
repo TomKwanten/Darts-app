@@ -3,6 +3,7 @@ import { GameContext } from "../context/GameContext";
 import NumpadCricket from "./NumpadCricket";
 import Numpad501 from "./Numpad501";
 import NumpadAroundTheClock from "./NumpadATC";
+import NumpadShanghai from "./NumpadShanghai";
 
 export default function Numpad() {
     const { gameState, dispatch } = useContext(GameContext);
@@ -54,5 +55,6 @@ export default function Numpad() {
     if (gameMode === "501") return <Numpad501 dartCounter={dartCounter} undoSubmit={undoSubmit} />;
     if (gameMode === "cricket") return <NumpadCricket dartCounter={dartCounter} undoSubmit={undoSubmit} />;
     if (gameMode === "around-the-clock" || gameMode === "around-the-clock-solo") return <NumpadAroundTheClock dartCounter={dartCounter} undoSubmit={undoSubmit} />;
+    if (gameMode === "shanghai") return <NumpadShanghai dartCounter={dartCounter} undoSubmit={undoSubmit} />;
     return null;
 }

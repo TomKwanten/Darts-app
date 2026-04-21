@@ -11,6 +11,7 @@ const MODE_LABELS = {
     cricket: "Cricket",
     "501": "501",
     "around-the-clock": "Around the Clock",
+    "shanghai": "Shanghai",
 };
 
 export default function Setup() {
@@ -27,12 +28,14 @@ export default function Setup() {
     const [finishMultiplier, setFinishMultiplier] = useState(2);
     const [order, setOrder] = useState("sequential");
     const [solo, setSolo] = useState(false);
+    const [maxRounds, setMaxRounds] = useState(7);
 
     const navigate = useNavigate();
     const location = useLocation();
     const gameMode = location.state?.gameMode;
     const { dispatch } = useContext(GameContext);
     const isATC = gameMode === "around-the-clock";
+    const isShanghai = gameMode === "shanghai";
 
     useEffect(() => {
         if (!gameMode) navigate("/", { replace: true });
@@ -116,6 +119,15 @@ export default function Setup() {
                     bulls: { green: 0, red: 0 },
                 };
             }
+            if (gameMode === "shanghai") {
+                return {
+                    id: player.id,
+                    name: player.name,
+                    score: 0,
+                    shanghais: 0,
+                    darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
+                };
+            }
             return {
                 id: player.id,
                 name: player.name,
@@ -128,7 +140,7 @@ export default function Setup() {
 
         dispatch({
             type: "START_GAME",
-            payload: { players: gamePlayers, gameMode, finishMultiplier },
+            payload: { players: gamePlayers, gameMode, finishMultiplier, maxRounds },
         });
         navigate("/game");
     }
@@ -408,6 +420,31 @@ export default function Setup() {
                             >
                                 Clockwise
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Shanghai rounds option */}
+                {isShanghai && (
+                    <div className="mb-6">
+                        <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                            Rounds
+                        </label>
+                        <div className="flex gap-2">
+                            {[7, 20].map((r) => (
+                                <button
+                                    key={r}
+                                    onClick={() => setMaxRounds(r)}
+                                    className="flex-1 py-2 rounded-lg text-sm font-bold uppercase tracking-wider
+                                               border transition-all duration-150"
+                                    style={{
+                                        backgroundColor: maxRounds === r ? BOARD_GREEN : "transparent",
+                                        borderColor: maxRounds === r ? BOARD_GREEN : "#374151",
+                                        color: maxRounds === r ? "white" : "#6b7280",
+                                    }}>
+                                    {r === 7 ? "7 Rounds" : "20 Rounds"}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 )}
