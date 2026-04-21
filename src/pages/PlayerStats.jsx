@@ -4,6 +4,7 @@ import { getGames } from "../utils/api";
 import CricketStats, { calculateCricketStats } from "../components/stats/CricketStats";
 import Stats501 from "../components/stats/Stats501";
 import ATCStats, { calculateATCStats } from "../components/stats/ATCStats";
+import ShanghaiStats, { calculateShanghaiStats } from "../components/stats/ShanghaiStats";
 
 export default function PlayerStats() {
     const { id } = useParams();
@@ -41,6 +42,7 @@ export default function PlayerStats() {
 
     const cricketStats = calculateCricketStats(games, playerId);
     const atcStats = calculateATCStats(games, playerId);
+    const shanghaiStats = calculateShanghaiStats(games, playerId);
 
     const playerGames = games.filter(g => g.players.some(p => p.id === playerId));
     const lastGame = [...playerGames].sort((a, b) =>
@@ -49,6 +51,7 @@ export default function PlayerStats() {
 
     const playerName = cricketStats?.playerName
         ?? atcStats?.playerName
+        ?? shanghaiStats?.playerName
         ?? lastGame?.players.find(p => p.id === playerId)?.name
         ?? "Player";
 
@@ -86,6 +89,7 @@ export default function PlayerStats() {
                     <option value="cricket">Cricket</option>
                     <option value="501">501</option>
                     <option value="around-the-clock">Around the Clock</option>
+                    <option value="shanghai">Shanghai</option>
                     <option value="overall">Overall</option>
                 </select>
             </div>
@@ -94,6 +98,7 @@ export default function PlayerStats() {
             {gameMode === "cricket" && <CricketStats stats={cricketStats} />}
             {gameMode === "501" && <Stats501 games={games} playerId={playerId} />}
             {gameMode === "around-the-clock" && <ATCStats stats={atcStats} />}
+            {gameMode === "shanghai" && <ShanghaiStats stats={shanghaiStats} />}
             {gameMode === "overall" && (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
                     <p className="text-gray-500 text-sm">Overall stats coming soon.</p>

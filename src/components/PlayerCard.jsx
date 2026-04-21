@@ -1,6 +1,7 @@
 import PlayerCardCricket from "./PlayerCardCricket";
 import PlayerCard501 from "./PlayerCard501";
 import PlayerCardAroundTheClock from "./PlayerCardATC";
+import PlayerCardShanghai from "./PlayerCardShanghai";
 
 const RANK_COLORS = {
     1: "#f59e0b", // gold
@@ -19,7 +20,7 @@ function dartLabel(dart) {
     return `${prefix}${num}`;
 }
 
-export default function PlayerCard({ player, isActive, gameMode, currentTurn, players, rank, finishMultiplier, order }) {
+export default function PlayerCard({ player, isActive, gameMode, currentTurn, players, rank, finishMultiplier, order, round }) {
     return (
         <div className="flex-1 rounded-xl border bg-gray-900 p-1.5 transition-all duration-300"
             style={{
@@ -107,6 +108,14 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
                     isActive={isActive}
                     order={order}
                     currentTurn={currentTurn}
+                />
+            )}
+            {gameMode === "shanghai" && (
+                <PlayerCardShanghai
+                    player={player}
+                    isActive={isActive}
+                    currentTurn={currentTurn}
+                    round={round}
                 />
             )}
         </div>
