@@ -51,11 +51,12 @@
 - [x] Bull stat — green bull (single) and red bull (double) tracked in all game modes
       - Stored in DB (green_bulls / red_bulls columns on game_player)
       - Shown as a Bulls card on the player stats page for Cricket and 501
+- [x] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
+- [x] PlayerStats.jsx refactored into components (StatCard, StatGrid, BullsCard, CricketStats, Stats501, ATCStats)
 
 ## Bugs
 
 ## Up Next
-- [ ] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
 
 ## Stats & Features
 - [ ] Overall stats section on player detail page
