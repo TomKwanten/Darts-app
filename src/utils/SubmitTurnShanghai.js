@@ -20,9 +20,11 @@ export function submitTurnShanghai(state) {
 
     const { pointsScored, isShanghai } = processShanghaiTurn(state.currentTurn, state.round);
 
+    // Count ALL darts thrown (including misses) for total,
+    // but only count real hits for singles/doubles/triples
     const realDarts = state.currentTurn.filter(d => d.number !== 0);
     const newDarts = { ...currentPlayer.darts };
-    newDarts.total += realDarts.length;
+    newDarts.total += state.currentTurn.length; // all 3 darts, including misses
     for (const dart of realDarts) {
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;

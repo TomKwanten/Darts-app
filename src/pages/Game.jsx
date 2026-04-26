@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { GameContext } from "../context/GameContext";
 import { Link, useNavigate, useBlocker } from "react-router-dom";
 import Numpad from "../components/Numpad";
@@ -64,13 +64,25 @@ export default function Game() {
     const [saveError, setSaveError] = useState(false);
     const Navigate = useNavigate();
 
+    // Guard against StrictMode double-firing and Play Again re-saves
+    const hasSavedRef = useRef(false);
+
     const isGameInProgress = players.length > 0 && !winner;
     const isSolo = gameMode === "around-the-clock-solo";
 
     const blocker = useBlocker(isGameInProgress);
 
     useEffect(() => {
-        if (!winner) return;
+        if (!winner) {
+            // Reset the save guard when there's no winner (new game started)
+            hasSavedRef.current = false;
+            return;
+        }
+
+        // Only save once per winner — guards against StrictMode double-invoke
+        if (hasSavedRef.current) return;
+        hasSavedRef.current = true;
+
         const gameSummary = {
             winner_id: winner.id,
             game_mode: gameMode,

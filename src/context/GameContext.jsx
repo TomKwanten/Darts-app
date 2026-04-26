@@ -35,9 +35,11 @@ export default function GameProvider({ children }) {
         console.log("action:", action.type, action.payload);
         switch (action.type) {
             case "START_GAME":
+                // Spread initialState first so winner/turns/turnHistory/round/etc.
+                // are fully reset — no state from a previous game can leak through.
                 return {
-                    ...state,
-                    players: action.payload.players.map(p => ({ ...p, gepikt: 0})),
+                    ...initialState,
+                    players: action.payload.players.map(p => ({ ...p, gepikt: 0 })),
                     gameMode: action.payload.gameMode,
                     finishMultiplier: action.payload.finishMultiplier,
                     order: action.payload.order ?? "sequential",

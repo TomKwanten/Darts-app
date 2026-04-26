@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getGames, deleteGame } from "../utils/api";
 
+const GAME_MODE_LABEL = {
+    cricket: "Cricket",
+    "501": "501",
+    "around-the-clock": "ATC",
+    "around-the-clock-solo": "ATC Solo",
+    "shanghai": "Shanghai",
+};
+
 function calculateCareerStats(games) {
     const players = {};
     for (const game of games) {
@@ -59,7 +67,6 @@ export default function Stats() {
         }
     }
 
-    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -68,20 +75,18 @@ export default function Stats() {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
                 <p className="text-red-400 text-sm uppercase tracking-widest">{error}</p>
                 <Link to="/"
                     className="text-xs uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
-                    ← Back to setup
+                    ‹‹ Back to setup
                 </Link>
             </div>
         );
     }
 
-    // Empty state — loading is done, but no games yet
     if (games.length === 0) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-4">
@@ -120,8 +125,6 @@ export default function Stats() {
                         <Link key={player.name}
                             to={`/stats/players/${player.id}`}
                             className="rounded-xl border border-gray-800 bg-gray-900 p-3 block active:opacity-70 transition-opacity">
-
-                            {/* Name + win rate */}
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-black tabular-nums w-4"
@@ -137,8 +140,6 @@ export default function Stats() {
                                     {player.wins}W — {player.gamesPlayed - player.wins}L
                                 </span>
                             </div>
-
-                            {/* Dart breakdown */}
                             <div className="grid grid-cols-4 gap-1 text-center">
                                 {[
                                     { label: "Darts", value: player.totalDarts },
@@ -146,14 +147,9 @@ export default function Stats() {
                                     { label: "Doubles", value: player.doubles },
                                     { label: "Triples", value: player.triples },
                                 ].map(({ label, value }) => (
-                                    <div key={label}
-                                        className="rounded-lg bg-gray-800 py-1 px-1">
-                                        <div className="text-sm font-black tabular-nums text-gray-100">
-                                            {value}
-                                        </div>
-                                        <div className="text-[9px] uppercase tracking-wider text-gray-500 mt-[1px]">
-                                            {label}
-                                        </div>
+                                    <div key={label} className="rounded-lg bg-gray-800 py-1 px-1">
+                                        <div className="text-sm font-black tabular-nums text-gray-100">{value}</div>
+                                        <div className="text-[9px] uppercase tracking-wider text-gray-500 mt-[1px]">{label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -174,13 +170,18 @@ export default function Stats() {
                             state={{ game }}
                             className="rounded-xl border border-gray-800 bg-gray-900 p-3 block">
 
-                            {/* Date + winner */}
+                            {/* Date + mode badge + delete + winner */}
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-gray-500">
                                         {new Date(game.played_at).toLocaleDateString(undefined, {
                                             day: "numeric", month: "short", year: "numeric"
                                         })}
+                                    </span>
+                                    {/* Gamemode badge */}
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                        style={{ backgroundColor: "#1a4731", color: "#86efac" }}>
+                                        {GAME_MODE_LABEL[game.game_mode] ?? game.game_mode}
                                     </span>
                                     {confirmDeleteGameId === game.id ? (
                                         <div className="flex items-center gap-2">
