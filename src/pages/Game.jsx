@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GameContext } from "../context/GameContext";
 import { Link, useNavigate, useBlocker } from "react-router-dom";
 import Numpad from "../components/Numpad";
@@ -7,6 +7,11 @@ import { saveGame } from "../utils/api";
 import { getProgressIndex } from "../utils/ATCLogic";
 
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
+
+// Module-level flag — lives outside the component so it survives
+// StrictMode's double mount/unmount cycle. Set to true the instant
+// we start saving, so a second effect invocation is blocked immediately.
+let isSaving = false;
 
 function computeRanks(players, gameMode, order) {
     const isATC = gameMode === "around-the-clock" || gameMode === "around-the-clock-solo";
@@ -62,10 +67,7 @@ export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
     const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order, solo, round } = gameState;
     const [saveError, setSaveError] = useState(false);
-    const Navigate = useNavigate();
-
-    // Guard against StrictMode double-firing and Play Again re-saves
-    const hasSavedRef = useRef(false);
+    const navigate = useNavigate();
 
     const isGameInProgress = players.length > 0 && !winner;
     const isSolo = gameMode === "around-the-clock-solo";
@@ -74,14 +76,15 @@ export default function Game() {
 
     useEffect(() => {
         if (!winner) {
-            // Reset the save guard when there's no winner (new game started)
-            hasSavedRef.current = false;
+            // Reset the flag when there's no winner so the next game can save
+            isSaving = false;
             return;
         }
 
-        // Only save once per winner — guards against StrictMode double-invoke
-        if (hasSavedRef.current) return;
-        hasSavedRef.current = true;
+        // Block immediately — before any async work — so the StrictMode
+        // second invocation hits this guard while the first is still in flight
+        if (isSaving) return;
+        isSaving = true;
 
         const gameSummary = {
             winner_id: winner.id,
@@ -104,10 +107,17 @@ export default function Game() {
             })),
             turns: turns,
         };
+
         console.log("Saving game:", JSON.stringify(gameSummary, null, 2));
-        saveGame(gameSummary).catch(() => {
-            setSaveError(true);
-        });
+
+        saveGame(gameSummary)
+            .then(() => {
+                navigate("/winner", { replace: true, state: { winner, gameMode, isSolo } });
+            })
+            .catch(() => {
+                isSaving = false; // allow retry on error
+                setSaveError(true);
+            });
     }, [winner]);
 
     const rankMap = computeRanks(players, gameMode, order);
@@ -180,38 +190,23 @@ export default function Game() {
                 </Link>
             </div>
 
-            {/* Winner banner */}
+            {/* Saving indicator */}
             {winner && (
                 <div className="rounded-xl border p-3 text-center flex-shrink-0"
                     style={{ borderColor: "#cc2200", backgroundColor: "#1a0500" }}>
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">
-                        {isSolo ? "Finished!" : "Winner"}
-                    </p>
-                    {winner?.isShanghai && (
-                        <p className="text-xs font-black uppercase tracking-[0.2em]"
-                            style={{ color: "#f59e0b" }}>
-                            Shanghai!
-                        </p>
-                    )}
-                    <h2 className="text-2xl font-black uppercase tracking-tight"
-                        style={{ color: "#cc2200" }}>
-                        {winner.name}
-                    </h2>
-                    {isSolo && (
-                        <p className="text-sm text-gray-400 mt-1">
-                            {winner.finalPlayers[0]?.darts.total} darts
-                        </p>
-                    )}
-                    <button
-                        onClick={() => { dispatch({ type: "RESET_GAME" }); setSaveError(false); Navigate("/"); }}
-                        className="mt-2 px-5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white"
-                        style={{ backgroundColor: "#cc2200" }}>
-                        Play Again
-                    </button>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Saving...</p>
                     {saveError && (
-                        <p className="mt-2 text-xs uppercase tracking-widest text-red-400">
-                            Game could not be saved
-                        </p>
+                        <div>
+                            <p className="mt-2 text-xs uppercase tracking-widest text-red-400">
+                                Game could not be saved
+                            </p>
+                            <button
+                                onClick={() => { dispatch({ type: "RESET_GAME" }); navigate("/"); }}
+                                className="mt-2 px-5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white"
+                                style={{ backgroundColor: "#cc2200" }}>
+                                Continue anyway
+                            </button>
+                        </div>
                     )}
                 </div>
             )}

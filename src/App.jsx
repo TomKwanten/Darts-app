@@ -3,6 +3,7 @@ import GameProvider from "./context/GameContext";
 import Home from "./pages/Home";
 import Setup from "./pages/Setup";
 import Game from "./pages/Game";
+import Winner from "./pages/Winner";
 import Stats from "./pages/Stats";
 import PlayerStats from "./pages/PlayerStats";
 import GameDetail from "./pages/GameDetail";
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
             { path: "/", element: <Home /> },
             { path: "/setup", element: <Setup /> },
             { path: "/game", element: <Game /> },
+            { path: "/winner", element: <Winner /> },
             { path: "/stats", element: <Stats /> },
             { path: "/stats/players/:id", element: <PlayerStats /> },
             { path: "/stats/games/:id", element: <GameDetail /> },
