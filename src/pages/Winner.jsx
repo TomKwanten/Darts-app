@@ -2,25 +2,50 @@ import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { GameContext } from "../context/GameContext";
 
+const NO_POINTS_MODES = ["around-the-clock", "around-the-clock-solo"];
+
 export default function Winner() {
     const { dispatch } = useContext(GameContext);
     const { state } = useLocation();
     const navigate = useNavigate();
 
-    // state is passed from Game.jsx via navigate("/winner", { state: ... })
     const winner = state?.winner;
     const gameMode = state?.gameMode;
     const isSolo = state?.isSolo;
+    const isATC = gameMode === "around-the-clock" || gameMode === "around-the-clock-solo";
+    const isATCMultiplayer = gameMode === "around-the-clock";
 
     if (!winner) {
-        // Shouldn't happen, but guard against direct navigation to /winner
         navigate("/", { replace: true });
         return null;
     }
 
+    const showPoints = !NO_POINTS_MODES.includes(gameMode);
+
     function handlePlayAgain() {
         dispatch({ type: "RESET_GAME" });
         navigate("/");
+    }
+
+    function getPlayerStat(player) {
+        if (isATCMultiplayer) {
+            // Show how far each player got — their current target at game end
+            const target = player.currentTarget;
+            const label = target === 25 ? "Bull" : target;
+            const isWinner = player.id === winner.id;
+            // Winner reached the end, show "Finished"
+            return isWinner ? "Finished" : `Reached ${label}`;
+        }
+        if (showPoints) {
+            const points = gameMode === "shanghai"
+                ? player.score
+                : gameMode === "501"
+                    ? (501 - player.score)
+                    : (player.points ?? 0);
+            return `${points} pts · ${player.darts.total} darts`;
+        }
+        // ATC solo — show darts
+        return `${player.darts.total} darts`;
     }
 
     return (
@@ -53,23 +78,18 @@ export default function Winner() {
                 {/* Final scores */}
                 <div className="flex flex-col gap-2 mb-6">
                     {winner.finalPlayers?.map(player => {
-                        const isWinner = player.id === winner.id;
-                        const points = gameMode === "shanghai"
-                            ? player.score
-                            : gameMode === "501"
-                                ? (501 - player.score)
-                                : (player.points ?? 0);
+                        const isWinnerPlayer = player.id === winner.id;
                         return (
                             <div key={player.id}
                                 className="flex items-center justify-between rounded-lg px-3 py-2"
-                                style={{ backgroundColor: isWinner ? "#2a0800" : "#111827" }}>
+                                style={{ backgroundColor: isWinnerPlayer ? "#2a0800" : "#111827" }}>
                                 <span className="text-sm font-black uppercase tracking-wide"
-                                    style={{ color: isWinner ? "#cc2200" : "#6b7280" }}>
-                                    {isWinner ? "🎯 " : ""}{player.name}
+                                    style={{ color: isWinnerPlayer ? "#cc2200" : "#6b7280" }}>
+                                    {isWinnerPlayer ? "🎯 " : ""}{player.name}
                                 </span>
                                 <span className="text-sm tabular-nums"
-                                    style={{ color: isWinner ? "#cc2200" : "#4b5563" }}>
-                                    {points} pts · {player.darts.total} darts
+                                    style={{ color: isWinnerPlayer ? "#cc2200" : "#4b5563" }}>
+                                    {getPlayerStat(player)}
                                 </span>
                             </div>
                         );

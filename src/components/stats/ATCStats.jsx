@@ -1,6 +1,59 @@
 import StatCard from "./StatCard";
 import StatGrid from "./StatGrid";
 
+const CLOCKWISE_ORDER = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5,25];
+const SEQUENTIAL_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
+
+function getStartNumber(order) {
+    return order === "clockwise" ? 20 : 1;
+}
+
+function detectOrder(turns) {
+    if (!turns || turns.length === 0) return "sequential";
+    const first = turns[0];
+    // If first running_total is 1 or 2, it's sequential (hit or stay on 1)
+    return (first.running_total <= 2) ? "sequential" : "clockwise";
+}
+
+/**
+ * Aggregate turns across multiple games to find which number
+ * required the most turns (attempts) per hit.
+ * Returns array of { number, tries, hits, misses, triesPerHit }
+ */
+function computeHardestNumbers(games, playerId) {
+    const totals = {}; // number → { tries, hits }
+
+    for (const game of games) {
+        const playerTurns = game.turns
+            ?.filter(t => t.player_id === playerId)
+            .sort((a, b) => a.turn_number - b.turn_number) ?? [];
+
+        if (playerTurns.length === 0) continue;
+
+        const order = detectOrder(playerTurns);
+        let prevTarget = getStartNumber(order);
+
+        for (const turn of playerTurns) {
+            const aimed = prevTarget;
+            if (!totals[aimed]) totals[aimed] = { tries: 0, hits: 0 };
+            totals[aimed].tries += 1;
+            if (turn.points_scored === 1) totals[aimed].hits += 1;
+            prevTarget = turn.running_total;
+        }
+    }
+
+    return Object.entries(totals)
+        .map(([num, { tries, hits }]) => ({
+            number: parseInt(num),
+            tries,
+            hits,
+            misses: tries - hits,
+            triesPerHit: hits > 0 ? tries / hits : tries, // infinite if never hit
+        }))
+        .filter(d => d.tries > 0)
+        .sort((a, b) => b.triesPerHit - a.triesPerHit);
+}
+
 export function calculateATCStats(games, playerId) {
     const mpGames = games.filter(g =>
         g.game_mode === "around-the-clock" && g.players.some(p => p.id === playerId)
@@ -33,7 +86,6 @@ export function calculateATCStats(games, playerId) {
     let soloRuns = 0, soloTotalDarts = 0;
     let soloSingles = 0, soloDoubles = 0, soloTriples = 0;
     let soloBestDarts = null, soloCompletedDarts = 0, soloCompleted = 0;
-    let soloTotalHits = 0;
 
     for (const game of soloGames) {
         const player = game.players.find(p => p.id === playerId);
@@ -44,8 +96,6 @@ export function calculateATCStats(games, playerId) {
         soloSingles += player.singles;
         soloDoubles += player.doubles;
         soloTriples += player.triples;
-        const playerTurns = game.turns.filter(t => t.player_id === playerId);
-        for (const turn of playerTurns) soloTotalHits += turn.points_scored;
         if (isFinished) {
             soloCompleted++;
             soloCompletedDarts += player.total_darts;
@@ -53,8 +103,13 @@ export function calculateATCStats(games, playerId) {
         }
     }
 
+    // Hardest numbers across all ATC games combined
+    const allATCGames = [...mpGames, ...soloGames];
+    const hardestNumbers = computeHardestNumbers(allATCGames, playerId);
+
     return {
         playerName,
+        hardestNumbers,
         multiplayer: mpGames.length === 0 ? null : {
             gamesPlayed: mpGames.length, wins: mpWins, losses: mpGames.length - mpWins,
             bestDarts: mpBestDarts,
@@ -80,8 +135,46 @@ export default function ATCStats({ stats }) {
         </div>
     );
 
+    const top3Hardest = stats.hardestNumbers?.slice(0, 3) ?? [];
+
     return (
         <div className="flex flex-col gap-4">
+
+            {/* Hardest numbers — shown if we have enough data */}
+            {top3Hardest.length > 0 && (
+                <StatCard title="Hardest Numbers">
+                    <div className="flex flex-col gap-2">
+                        {top3Hardest.map((d, i) => (
+                            <div key={d.number}
+                                className="flex items-center gap-3 rounded-lg bg-gray-800 px-3 py-2">
+                                <div className="text-xl font-black tabular-nums w-8 text-center"
+                                    style={{ color: i === 0 ? "#cc2200" : i === 1 ? "#f59e0b" : "#6b7280" }}>
+                                    {d.number === 25 ? "B" : d.number}
+                                </div>
+                                <div className="flex-1 grid grid-cols-3 gap-1 text-center">
+                                    {[
+                                        { label: "Tries", value: d.tries },
+                                        { label: "Hits", value: d.hits },
+                                        { label: "Misses", value: d.misses },
+                                    ].map(({ label, value }) => (
+                                        <div key={label}>
+                                            <div className="text-sm font-black tabular-nums text-gray-100">{value}</div>
+                                            <div className="text-[9px] uppercase tracking-wider text-gray-500">{label}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm font-black tabular-nums text-gray-100">
+                                        {d.triesPerHit.toFixed(1)}
+                                    </div>
+                                    <div className="text-[9px] uppercase tracking-wider text-gray-500">tries/hit</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </StatCard>
+            )}
+
             {stats.multiplayer && (
                 <>
                     <div className="text-xs uppercase tracking-[0.3em] text-gray-600 mt-1">Multiplayer</div>

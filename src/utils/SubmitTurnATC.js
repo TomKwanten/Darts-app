@@ -27,8 +27,10 @@ export function submitTurnAroundTheClock(state) {
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of state.currentTurn) {
-        if (dart.number === 0) continue;
+        // Count ALL darts thrown (including misses) in total
+        // so that misses = total - singles - doubles - triples works correctly
         newDarts.total += 1;
+        if (dart.number === 0) continue; // miss dart — only counts toward total
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;

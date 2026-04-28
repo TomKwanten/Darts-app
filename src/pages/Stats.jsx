@@ -10,10 +10,17 @@ const GAME_MODE_LABEL = {
     "shanghai": "Shanghai",
 };
 
+const NO_POINTS_MODES = ["around-the-clock", "around-the-clock-solo"];
+
+// Solo modes don't count toward career W/L
+const SOLO_MODES = ["around-the-clock-solo"];
+
 function calculateCareerStats(games) {
     const players = {};
     for (const game of games) {
-        if (!game.winner) continue; 
+        if (!game.winner) continue;
+        const isSolo = SOLO_MODES.includes(game.game_mode);
+
         for (const player of game.players) {
             if (!players[player.name]) {
                 players[player.name] = {
@@ -28,8 +35,11 @@ function calculateCareerStats(games) {
                 };
             }
             const career = players[player.name];
-            career.gamesPlayed += 1;
-            career.wins += game.winner.name === player.name ? 1 : 0;
+            // Solo games count toward darts totals but NOT toward W/L
+            if (!isSolo) {
+                career.gamesPlayed += 1;
+                career.wins += game.winner.name === player.name ? 1 : 0;
+            }
             career.totalDarts += player.total_darts;
             career.singles += player.singles;
             career.doubles += player.doubles;
@@ -41,9 +51,9 @@ function calculateCareerStats(games) {
 
 export default function Stats() {
     const [games, setGames] = useState([]);
-    const [loading, setLoading] = useState(true);   
-    const [error, setError] = useState(null);   
-    const [confirmDeleteGameId, setConfirmDeleteGameId] = useState(null);     
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [confirmDeleteGameId, setConfirmDeleteGameId] = useState(null);
 
     useEffect(() => {
         getGames()
@@ -164,73 +174,72 @@ export default function Stats() {
                     History
                 </div>
                 <div className="flex flex-col gap-2">
-                    {games.map((game) => (
-                        <Link key={game.id}
-                            to={`/stats/games/${game.id}`}
-                            state={{ game }}
-                            className="rounded-xl border border-gray-800 bg-gray-900 p-3 block">
+                    {games.map((game) => {
+                        const noPoints = NO_POINTS_MODES.includes(game.game_mode);
+                        return (
+                            <Link key={game.id}
+                                to={`/stats/games/${game.id}`}
+                                state={{ game }}
+                                className="rounded-xl border border-gray-800 bg-gray-900 p-3 block">
 
-                            {/* Date + mode badge + delete + winner */}
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">
-                                        {new Date(game.played_at).toLocaleDateString(undefined, {
-                                            day: "numeric", month: "short", year: "numeric"
-                                        })}
-                                    </span>
-                                    {/* Gamemode badge */}
-                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
-                                        style={{ backgroundColor: "#1a4731", color: "#86efac" }}>
-                                        {GAME_MODE_LABEL[game.game_mode] ?? game.game_mode}
-                                    </span>
-                                    {confirmDeleteGameId === game.id ? (
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(null); }}
-                                                className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteGame(game.id); }}
-                                                className="text-xs font-black text-red-500 hover:text-red-400 transition-colors duration-150"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(game.id); }}
-                                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150"
-                                        >
-                                            ✕
-                                        </button>
-                                    )}
-                                </div>
-                                <span className="text-sm font-black uppercase tracking-wider"
-                                    style={{ color: "#cc2200" }}>
-                                    🎯 {game.winner?.name ?? "Unknown"}
-                                </span>
-                            </div>
-
-                            {/* Players */}
-                            <div className="flex flex-col gap-1">
-                                {game.players.map(player => (
-                                    <div key={player.name}
-                                        className="flex items-center justify-between text-xs">
-                                        <span className={game.winner && player.name === game.winner.name
-                                            ? "font-bold text-gray-100"
-                                            : "text-gray-500"}>
-                                            {player.name}
+                                {/* Date + mode badge + delete + winner */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500">
+                                            {new Date(game.played_at).toLocaleDateString(undefined, {
+                                                day: "numeric", month: "short", year: "numeric"
+                                            })}
                                         </span>
-                                        <span className="tabular-nums text-gray-500">
-                                            {player.points}pts · {player.total_darts} darts
+                                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                            style={{ backgroundColor: "#1a4731", color: "#86efac" }}>
+                                            {GAME_MODE_LABEL[game.game_mode] ?? game.game_mode}
                                         </span>
+                                        {confirmDeleteGameId === game.id ? (
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(null); }}
+                                                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150">
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteGame(game.id); }}
+                                                    className="text-xs font-black text-red-500 hover:text-red-400 transition-colors duration-150">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteGameId(game.id); }}
+                                                className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150">
+                                                ✕
+                                            </button>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
-                        </Link>
-                    ))}
+                                    <span className="text-sm font-black uppercase tracking-wider"
+                                        style={{ color: "#cc2200" }}>
+                                        🎯 {game.winner?.name ?? "Unknown"}
+                                    </span>
+                                </div>
+
+                                {/* Players */}
+                                <div className="flex flex-col gap-1">
+                                    {game.players.map(player => (
+                                        <div key={player.name}
+                                            className="flex items-center justify-between text-xs">
+                                            <span className={game.winner && player.name === game.winner.name
+                                                ? "font-bold text-gray-100"
+                                                : "text-gray-500"}>
+                                                {player.name}
+                                            </span>
+                                            <span className="tabular-nums text-gray-500">
+                                                {noPoints ? "" : `${player.points}pts · `}{player.total_darts} darts
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
         </div>

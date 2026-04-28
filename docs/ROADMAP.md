@@ -53,21 +53,23 @@
       - Shown as a Bulls card on the player stats page for Cricket and 501
 - [x] "Gepikt" (stolen) stat — Cricket button to log when a player hits a number they didn't intend to score on; shown as a lifetime fun counter in PlayerStats
 - [x] PlayerStats.jsx refactored into components (StatCard, StatGrid, BullsCard, CricketStats, Stats501, ATCStats)
+- [x] Shanghai — fully working end-to-end
+      - Configurable 7 or 20 rounds
+      - All players throw at the same number per round; score = hits × multiplier
+      - Shanghai instant win (S+D+T of round number in one turn)
+      - Highest score after all rounds wins
 
 ## Bugs
 
 ## Up Next
+- [ ] ATC stats testing
+- [ ] large files refactoring
 
 ## Stats & Features
 - [ ] Overall stats section on player detail page
 - [ ] Per-gamemode stats filtering on main Stats page
 
 ## Future Game Modes
-- [x] Shanghai — fully working end-to-end
-      - Configurable 7 or 20 rounds
-      - All players throw at the same number per round; score = hits × multiplier
-      - Shanghai instant win (S+D+T of round number in one turn)
-      - Highest score after all rounds wins
 - [ ] Halve It
 - [ ] Score Training
 
