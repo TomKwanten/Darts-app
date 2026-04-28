@@ -1,5 +1,5 @@
-const BASE_URL = 'http://192.168.0.209:8000/api'; // kamer
-// const BASE_URL = 'http://192.168.137.1:8000/api'; // tuinhuis
+//const BASE_URL = 'http://192.168.0.209:8000/api'; // kamer
+const BASE_URL = 'http://192.168.137.1:8000/api'; // tuinhuis
 // const BASE_URL = 'http://localhost:8000/api';
 
 export async function getPlayers() {

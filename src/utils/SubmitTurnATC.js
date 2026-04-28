@@ -2,6 +2,9 @@ import { processAroundTheClockTurn } from "./ATCLogic";
 
 export function submitTurnAroundTheClock(state) {
     const currentPlayer = state.players[state.currentPlayerIndex];
+    console.log("ATC submit — currentPlayer:", JSON.stringify(currentPlayer));
+    console.log("ATC submit — state.order:", state.order);
+    console.log("ATC submit — currentTurn:", JSON.stringify(state.currentTurn));
 
     const snapshot = {
         players: state.players,
@@ -17,14 +20,14 @@ export function submitTurnAroundTheClock(state) {
     };
 
     const { newTarget, win } = processAroundTheClockTurn(
-        currentPlayer.target,
+        currentPlayer.currentTarget,
         state.currentTurn,
         state.order
     );
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of state.currentTurn) {
-        if (dart.number === 0) continue; // skip miss darts
+        if (dart.number === 0) continue;
         newDarts.total += 1;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
@@ -35,13 +38,13 @@ export function submitTurnAroundTheClock(state) {
 
     const updatedPlayers = state.players.map((player, index) => {
         if (index !== state.currentPlayerIndex) return player;
-        return { ...player, target: newTarget, darts: newDarts };
+        return { ...player, currentTarget: newTarget, darts: newDarts };
     });
 
     const turnData = {
         player_id: currentPlayer.id,
         turn_number: state.turnNumber,
-        points_scored: newTarget !== currentPlayer.target ? 1 : 0,
+        points_scored: newTarget !== currentPlayer.currentTarget ? 1 : 0,
         running_total: newTarget,
         singles: realDarts.filter(d => d.multiplier === 1).length,
         doubles: realDarts.filter(d => d.multiplier === 2).length,

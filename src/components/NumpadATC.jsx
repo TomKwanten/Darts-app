@@ -15,9 +15,8 @@ export default function NumpadATC({ dartCounter, undoSubmit }) {
 
     const currentPlayer = gameState.players[gameState.currentPlayerIndex];
 
-    // Simulate the darts thrown so far this turn to get the live current target
     const { newTarget } = processAroundTheClockTurn(
-        currentPlayer?.target ?? 1,
+        currentPlayer?.currentTarget ?? 1,
         gameState.currentTurn,
         gameState.order
     );

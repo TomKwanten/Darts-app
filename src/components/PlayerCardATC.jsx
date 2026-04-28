@@ -1,18 +1,18 @@
 import { SEQUENCES, getProgressIndex, processAroundTheClockTurn } from "../utils/ATCLogic";
 
 export default function PlayerCardAroundTheClock({ player, isActive, order, currentTurn }) {
+    console.log("PlayerCardATC render — player.currentTarget:", player.currentTarget, "player.target:", player.target);
     const seq = SEQUENCES[order ?? "sequential"];
     const total = seq.length;
 
-    // Simulate darts thrown so far this turn to get the live target
     const liveTarget = isActive && currentTurn?.length > 0
-        ? processAroundTheClockTurn(player.target, currentTurn, order ?? "sequential").newTarget
-        : player.target;
+        ? processAroundTheClockTurn(player.currentTarget, currentTurn, order ?? "sequential").newTarget
+        : player.currentTarget;
 
     const progressIndex = getProgressIndex(liveTarget, order ?? "sequential");
     const completed = progressIndex;
     const targetLabel = liveTarget === 25 ? "Bull" : liveTarget;
-    const isLive = isActive && liveTarget !== player.target;
+    const isLive = isActive && liveTarget !== player.currentTarget;
 
     return (
         <div className="flex flex-col items-center gap-1 py-1">

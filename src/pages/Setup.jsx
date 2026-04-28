@@ -107,7 +107,8 @@ export default function Setup() {
 
     function handleStartGame() {
         const selectedPlayers = allPlayers.filter(p => selectedIds.includes(p.id));
-        if (selectedPlayers.length < 2) return;
+        const minPlayers = isATC && solo ? 1 : 2;
+        if (selectedPlayers.length < minPlayers) return;
 
         const gamePlayers = selectedPlayers.map(player => {
             if (gameMode === "501") {
@@ -117,6 +118,15 @@ export default function Setup() {
                     score: 501,
                     darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
                     bulls: { green: 0, red: 0 },
+                };
+            }
+            if (gameMode === "around-the-clock") {
+                return {
+                    id: player.id,
+                    name: player.name,
+                    currentTarget: SEQUENCES[order][0],
+                    targetIndex: 0,
+                    darts: { total: 0, singles: 0, doubles: 0, triples: 0 },
                 };
             }
             if (gameMode === "shanghai") {
@@ -140,7 +150,7 @@ export default function Setup() {
 
         dispatch({
             type: "START_GAME",
-            payload: { players: gamePlayers, gameMode, finishMultiplier, maxRounds },
+            payload: { players: gamePlayers, gameMode, finishMultiplier, order, solo, maxRounds },
         });
         navigate("/game");
     }
