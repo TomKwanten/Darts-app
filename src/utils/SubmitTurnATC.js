@@ -6,6 +6,12 @@ export function submitTurnAroundTheClock(state) {
     console.log("ATC submit — state.order:", state.order);
     console.log("ATC submit — currentTurn:", JSON.stringify(state.currentTurn));
 
+    // Always pad to 3 darts — unthrown darts count as misses
+    const fullTurn = [...state.currentTurn];
+    while (fullTurn.length < 3) {
+        fullTurn.push({ number: 0, multiplier: 0 });
+    }
+
     const snapshot = {
         players: state.players,
         currentPlayerIndex: state.currentPlayerIndex,
@@ -16,17 +22,17 @@ export function submitTurnAroundTheClock(state) {
         gameMode: state.gameMode,
         finishMultiplier: state.finishMultiplier,
         order: state.order,
-        submittedTurn: state.currentTurn,
+        submittedTurn: fullTurn,
     };
 
     const { newTarget, win } = processAroundTheClockTurn(
         currentPlayer.currentTarget,
-        state.currentTurn,
+        fullTurn,
         state.order
     );
 
     const newDarts = { ...currentPlayer.darts };
-    for (const dart of state.currentTurn) {
+    for (const dart of fullTurn) {
         // Count ALL darts thrown (including misses) in total
         // so that misses = total - singles - doubles - triples works correctly
         newDarts.total += 1;
@@ -36,7 +42,7 @@ export function submitTurnAroundTheClock(state) {
         if (dart.multiplier === 3) newDarts.triples += 1;
     }
 
-    const realDarts = state.currentTurn.filter(d => d.number !== 0);
+    const realDarts = fullTurn.filter(d => d.number !== 0);
 
     const updatedPlayers = state.players.map((player, index) => {
         if (index !== state.currentPlayerIndex) return player;

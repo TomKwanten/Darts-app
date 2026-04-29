@@ -3,6 +3,12 @@ import { processShanghaiTurn } from "./ShanghaiLogic";
 export function submitTurnShanghai(state) {
     const currentPlayer = state.players[state.currentPlayerIndex];
 
+    // Always pad to 3 darts — unthrown darts count as misses
+    const fullTurn = [...state.currentTurn];
+    while (fullTurn.length < 3) {
+        fullTurn.push({ number: 0, multiplier: 0 });
+    }
+
     const snapshot = {
         players: state.players,
         currentPlayerIndex: state.currentPlayerIndex,
@@ -15,16 +21,16 @@ export function submitTurnShanghai(state) {
         order: state.order,
         round: state.round,
         maxRounds: state.maxRounds,
-        submittedTurn: state.currentTurn,
+        submittedTurn: fullTurn,
     };
 
-    const { pointsScored, isShanghai } = processShanghaiTurn(state.currentTurn, state.round);
+    const { pointsScored, isShanghai } = processShanghaiTurn(fullTurn, state.round);
 
     // Count ALL darts thrown (including misses) for total,
     // but only count real hits for singles/doubles/triples
-    const realDarts = state.currentTurn.filter(d => d.number !== 0);
+    const realDarts = fullTurn.filter(d => d.number !== 0);
     const newDarts = { ...currentPlayer.darts };
-    newDarts.total += state.currentTurn.length; // all 3 darts, including misses
+    newDarts.total += fullTurn.length; // always 3
     for (const dart of realDarts) {
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
@@ -75,7 +81,9 @@ export function submitTurnShanghai(state) {
         };
     }
 
-    const nextRound = isLastPlayerOfRound ? state.round + 1 : state.round;
+    const nextRound = isLastPlayerOfRound
+        ? state.round + 1
+        : state.round;
 
     return {
         ...state,

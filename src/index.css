@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+/* Remove Recharts focus outline on mobile tap */
+.recharts-wrapper,
+.recharts-wrapper *:focus,
+.recharts-surface {
+    outline: none !important;
+}

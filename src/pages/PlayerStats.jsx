@@ -1,19 +1,30 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { getGames } from "../utils/api";
 import CricketStats, { calculateCricketStats } from "../components/stats/CricketStats";
 import Stats501 from "../components/stats/Stats501";
 import ATCStats, { calculateATCStats } from "../components/stats/ATCStats";
 import ShanghaiStats, { calculateShanghaiStats } from "../components/stats/ShanghaiStats";
 
+const VALID_MODES = ["cricket", "501", "around-the-clock", "shanghai"];
+
+function resolveInitialMode(fromGameMode) {
+    if (!fromGameMode) return "cricket";
+    // Normalize solo variant to its base mode
+    if (fromGameMode === "around-the-clock-solo") return "around-the-clock";
+    if (VALID_MODES.includes(fromGameMode)) return fromGameMode;
+    return "cricket";
+}
+
 export default function PlayerStats() {
     const { id } = useParams();
     const playerId = parseInt(id);
+    const { state } = useLocation();
 
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [gameMode, setGameMode] = useState("cricket");
+    const [gameMode, setGameMode] = useState(() => resolveInitialMode(state?.fromGameMode));
 
     useEffect(() => {
         getGames()
@@ -102,41 +113,6 @@ export default function PlayerStats() {
             {gameMode === "overall" && (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
                     <p className="text-gray-500 text-sm">Overall stats coming soon.</p>
-                </div>
-            )}
-
-            {/* Last Game */}
-            {lastGame && (
-                <div className="mt-4">
-                    <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">Last Game</div>
-                    <Link
-                        to={`/stats/games/${lastGame.id}`}
-                        state={{ game: lastGame }}
-                        className="rounded-xl border border-gray-800 bg-gray-900 p-3 block active:opacity-70 transition-opacity">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-gray-500">
-                                {new Date(lastGame.played_at).toLocaleDateString(undefined, {
-                                    day: "numeric", month: "short", year: "numeric"
-                                })}
-                            </span>
-                            <span className="text-xs font-black uppercase tracking-wider" style={{ color: "#cc2200" }}>
-                                🎯 {lastGame.winner?.name ?? "Unknown"}
-                            </span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            {lastGame.players.map(player => (
-                                <div key={player.id ?? player.name} className="flex items-center justify-between text-xs">
-                                    <span className={lastGame.winner && player.name === lastGame.winner.name
-                                        ? "font-bold text-gray-100" : "text-gray-500"}>
-                                        {player.name ?? "Unknown"}
-                                    </span>
-                                    <span className="tabular-nums text-gray-500">
-                                        {player.total_darts} darts
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </Link>
                 </div>
             )}
         </div>
