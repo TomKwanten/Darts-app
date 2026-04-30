@@ -8,9 +8,6 @@ import { getProgressIndex } from "../utils/ATCLogic";
 
 const NUMBERS = [15, 16, 17, 18, 19, 20, 25];
 
-// Module-level flag — lives outside the component so it survives
-// StrictMode's double mount/unmount cycle. Set to true the instant
-// we start saving, so a second effect invocation is blocked immediately.
 let isSaving = false;
 
 function computeRanks(players, gameMode, order) {
@@ -65,7 +62,7 @@ function computeRanks(players, gameMode, order) {
 
 export default function Game() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { players, currentPlayerIndex, winner, turns, gameMode, currentTurn, finishMultiplier, order, solo, round } = gameState;
+    const { players, currentPlayerIndex, winner, turns, dartDetails, gameMode, currentTurn, finishMultiplier, order, solo, round } = gameState;
     const [saveError, setSaveError] = useState(false);
     const navigate = useNavigate();
 
@@ -76,15 +73,14 @@ export default function Game() {
 
     useEffect(() => {
         if (!winner) {
-            // Reset the flag when there's no winner so the next game can save
             isSaving = false;
             return;
         }
 
-        // Block immediately — before any async work — so the StrictMode
-        // second invocation hits this guard while the first is still in flight
         if (isSaving) return;
         isSaving = true;
+
+        const isATC = gameMode === "around-the-clock" || gameMode === "around-the-clock-solo";
 
         const gameSummary = {
             winner_id: winner.id,
@@ -106,6 +102,8 @@ export default function Game() {
                 shanghais: player.shanghais ?? 0,
             })),
             turns: turns,
+            // Only send dart_details for ATC games
+            ...(isATC && dartDetails?.length > 0 ? { dart_details: dartDetails } : {}),
         };
 
         console.log("Saving game:", JSON.stringify(gameSummary, null, 2));
@@ -115,7 +113,7 @@ export default function Game() {
                 navigate("/winner", { replace: true, state: { winner, gameMode, isSolo } });
             })
             .catch(() => {
-                isSaving = false; // allow retry on error
+                isSaving = false;
                 setSaveError(true);
             });
     }, [winner]);

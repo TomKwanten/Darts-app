@@ -20,6 +20,7 @@ const initialState = {
     turnHistory: [],
     turnNumber: 1,
     turns: [],
+    dartDetails: [],
 };
 
 const submitHandlers = {
@@ -35,8 +36,6 @@ export default function GameProvider({ children }) {
         console.log("action:", action.type, action.payload);
         switch (action.type) {
             case "START_GAME":
-                // Spread initialState first so winner/turns/turnHistory/round/etc.
-                // are fully reset — no state from a previous game can leak through.
                 return {
                     ...initialState,
                     players: action.payload.players.map(p => ({ ...p, gepikt: 0 })),
@@ -47,8 +46,20 @@ export default function GameProvider({ children }) {
                     round: 1,
                     maxRounds: action.payload.maxRounds ?? 7,
                 };
+
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };
+
+            // ATC-specific: add one dart, auto-submit after the 3rd
+            case "ADD_DART_ATC": {
+                const newTurn = [...state.currentTurn, action.payload];
+                if (newTurn.length < 3) {
+                    return { ...state, currentTurn: newTurn };
+                }
+                // 3rd dart — auto-submit
+                return submitTurnAroundTheClock({ ...state, currentTurn: newTurn });
+            }
+
             case "UNDO_DART": {
                 if (state.currentTurn.length > 0) {
                     return { ...state, currentTurn: state.currentTurn.slice(0, -1) };
@@ -62,6 +73,7 @@ export default function GameProvider({ children }) {
                     turnHistory: state.turnHistory.slice(0, -1),
                 };
             }
+
             case "MISS_TURN": {
                 const missDart = { number: 0, multiplier: 1 };
                 const filledTurn = [
@@ -71,12 +83,15 @@ export default function GameProvider({ children }) {
                 const handler = submitHandlers[state.gameMode];
                 return handler({ ...state, currentTurn: filledTurn });
             }
+
             case "BUST_TURN":
                 return bustTurn501(state);
+
             case "SUBMIT_TURN": {
                 const handler = submitHandlers[state.gameMode];
                 return handler(state);
             }
+
             case "GEPIKT": {
                 if (state.currentTurn.length === 0) return state;
                 const updatedTurn = state.currentTurn.map((dart, i) =>
@@ -89,8 +104,10 @@ export default function GameProvider({ children }) {
                 );
                 return { ...state, currentTurn: updatedTurn, players: updatedPlayers };
             }
+
             case "RESET_GAME":
                 return initialState;
+
             default:
                 return state;
         }

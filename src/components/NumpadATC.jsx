@@ -8,40 +8,71 @@ const MULTIPLIERS = [
     { label: "T", value: 3, full: "Triple" },
 ];
 
-export default function NumpadATC({ dartCounter, undoSubmit }) {
+export default function NumpadATC({ undoSubmit }) {
     const { gameState, dispatch } = useContext(GameContext);
-    const dartsThisTurn = gameState.currentTurn.length;
+    const { currentTurn, currentPlayerIndex, players } = gameState;
+    const dartsThisTurn = currentTurn.length;
     const turnFull = dartsThisTurn >= 3;
 
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    const currentPlayer = players[currentPlayerIndex];
 
     const { newTarget } = processAroundTheClockTurn(
         currentPlayer?.currentTarget ?? 1,
-        gameState.currentTurn,
+        currentTurn,
         gameState.order
     );
     const target = newTarget;
     const isBull = target === 25;
 
+    // Dart indicator — which dart we're on (1, 2, 3)
+    const dartIndex = dartsThisTurn + 1;
+
     function handleDart(multiplier) {
         if (turnFull) return;
-        dispatch({ type: "ADD_DART", payload: { number: target, multiplier } });
+        dispatch({
+            type: "ADD_DART_ATC",
+            payload: { number: target, multiplier },
+        });
     }
 
     function handleMiss() {
         if (turnFull) return;
-        dispatch({ type: "MISS_TURN" });
+        // Miss on the current target number — not a generic 0
+        dispatch({
+            type: "ADD_DART_ATC",
+            payload: { number: target, multiplier: 0 },
+        });
     }
 
     return (
         <div className="h-full flex flex-col rounded-2xl border border-gray-800 bg-gray-900 p-2 gap-2">
-            {dartCounter}
+
+            {/* Dart counter — shows which dart we're on */}
+            <div className="flex gap-1 px-1 pt-1">
+                {[1, 2, 3].map((d) => {
+                    const thrown = d <= dartsThisTurn;
+                    const current = d === dartIndex && !turnFull;
+                    return (
+                        <div
+                            key={d}
+                            className="flex-1 h-1.5 rounded-full transition-all duration-150"
+                            style={{
+                                backgroundColor: thrown
+                                    ? "#cc2200"
+                                    : current
+                                        ? "#374151"
+                                        : "#1f2937",
+                            }}
+                        />
+                    );
+                })}
+            </div>
 
             {/* Big target display */}
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <div className="text-center">
                     <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-1">
-                        Hit
+                        Dart {Math.min(dartIndex, 3)} — Hit
                     </div>
                     <div className="text-7xl font-black tabular-nums transition-all duration-150"
                         style={{ color: "#cc2200" }}>

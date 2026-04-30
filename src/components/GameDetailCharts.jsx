@@ -13,8 +13,43 @@ const PLAYER_COLOURS = [
     "#ec4899",
 ];
 
-// tabIndex={-1} + outline none on the chart itself kills the white focus ring on tap
+const CLOCKWISE_ORDER  = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5,25];
+const SEQUENTIAL_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
+
 const noFocusProps = { tabIndex: -1, style: { outline: "none" } };
+
+function computeATCBreakdownFromDartDetails(dartDetails, playerId) {
+    const playerDarts = dartDetails
+        .filter(d => d.player_id === playerId)
+        .sort((a, b) => a.turn_number - b.turn_number || a.dart_number - b.dart_number);
+
+    if (playerDarts.length === 0) return { breakdown: [] };
+
+    // Detect order from first dart's number
+    const firstNumber = playerDarts[0].number;
+    const order = firstNumber === 20 ? "clockwise" : "sequential";
+    const sequence = order === "clockwise" ? CLOCKWISE_ORDER : SEQUENTIAL_ORDER;
+
+    const breakdown = {};
+    for (const n of sequence) {
+        breakdown[n] = { number: n, hits: 0, misses: 0, tries: 0 };
+    }
+
+    for (const dart of playerDarts) {
+        const n = dart.number;
+        if (!breakdown[n]) continue;
+        breakdown[n].tries += 1;
+        if (dart.multiplier > 0) {
+            breakdown[n].hits += 1;
+        } else {
+            breakdown[n].misses += 1;
+        }
+    }
+
+    return {
+        breakdown: sequence.map(n => breakdown[n]).filter(d => d.tries > 0),
+    };
+}
 
 export function ScoreProgressionChart({ chartData, players }) {
     return (
@@ -57,11 +92,32 @@ export function ScoreProgressionChart({ chartData, players }) {
     );
 }
 
-export function ATCBreakdownCharts({ atcBreakdowns }) {
+export function ATCBreakdownCharts({ game }) {
+    const dartDetails = game.dart_details ?? [];
+    const hasDartDetails = dartDetails.length > 0;
+
     return (
         <>
-            {atcBreakdowns.map(({ player, breakdown }, pIndex) => {
+            {game.players.map((player, pIndex) => {
                 const colour = PLAYER_COLOURS[pIndex % PLAYER_COLOURS.length];
+
+                if (!hasDartDetails) {
+                    return (
+                        <div key={player.id ?? player.name} className="mb-8">
+                            <div className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">
+                                <span style={{ color: colour }}>{player.name}</span> — Number Breakdown
+                            </div>
+                            <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+                                <p className="text-gray-500 text-sm">
+                                    Detailed breakdown not available for this game.
+                                    Play a new game to see per-dart statistics.
+                                </p>
+                            </div>
+                        </div>
+                    );
+                }
+
+                const { breakdown } = computeATCBreakdownFromDartDetails(dartDetails, player.id);
                 const hardest = breakdown.reduce((best, d) =>
                     d.misses > (best?.misses ?? -1) ? d : best, null);
 
@@ -99,7 +155,7 @@ export function ATCBreakdownCharts({ atcBreakdowns }) {
 
                         <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
                             <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-2">
-                                Turns needed per number
+                                Darts thrown per number
                             </div>
                             <ResponsiveContainer width="100%" height={180} style={{ outline: "none" }}>
                                 <BarChart

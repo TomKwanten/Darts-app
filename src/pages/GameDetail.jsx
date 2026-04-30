@@ -3,44 +3,6 @@ import GameDetailPlayers from "../components/GameDetailPlayers";
 import { ScoreProgressionChart, ATCBreakdownCharts } from "../components/GameDetailCharts";
 import GameDetail501, { computePlayerStats } from "../components/GameDetail501";
 
-const CLOCKWISE_ORDER  = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5,25];
-const SEQUENTIAL_ORDER = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
-
-function getStartNumber(order) {
-    return order === "clockwise" ? 20 : 1;
-}
-
-function detectOrder(turns) {
-    if (!turns || turns.length === 0) return "sequential";
-    const first = turns[0];
-    return (first.running_total <= 2) ? "sequential" : "clockwise";
-}
-
-function computeATCNumberBreakdown(playerTurns, order) {
-    const breakdown = {};
-    const sequence = order === "clockwise" ? CLOCKWISE_ORDER : SEQUENTIAL_ORDER;
-    for (const n of sequence) {
-        breakdown[n] = { number: n, tries: 0, hits: 0, misses: 0 };
-    }
-
-    let prevTarget = getStartNumber(order);
-
-    for (const turn of playerTurns) {
-        const aimed = prevTarget;
-        if (breakdown[aimed]) {
-            breakdown[aimed].tries += 1;
-            if (turn.points_scored === 1) {
-                breakdown[aimed].hits += 1;
-            } else {
-                breakdown[aimed].misses += 1;
-            }
-        }
-        prevTarget = turn.running_total;
-    }
-
-    return sequence.map(n => breakdown[n]).filter(d => d.tries > 0);
-}
-
 const GAME_MODE_LABEL = {
     cricket: "Cricket",
     "501": "501",
@@ -48,8 +10,6 @@ const GAME_MODE_LABEL = {
     "around-the-clock-solo": "Around the Clock",
     "shanghai": "Shanghai",
 };
-
-const NO_POINTS_MODES = ["around-the-clock", "around-the-clock-solo"];
 
 export default function GameDetail() {
     const { state } = useLocation();
@@ -71,8 +31,6 @@ export default function GameDetail() {
     const is501 = game.game_mode === "501";
     const isATC = game.game_mode === "around-the-clock" || game.game_mode === "around-the-clock-solo";
 
-    const detectedOrder = hasTurns ? detectOrder(game.turns) : "sequential";
-
     const chartData = hasTurns && !isATC ? (() => {
         const maxTurn = Math.max(...game.turns.map(t => t.turn_number));
         return Array.from({ length: maxTurn }, (_, i) => {
@@ -93,18 +51,6 @@ export default function GameDetail() {
             player,
             ...computePlayerStats(player, game.turns, game.winner?.id),
         }))
-        : [];
-
-    const atcBreakdowns = isATC && hasTurns
-        ? game.players.map(player => {
-            const playerTurns = game.turns
-                .filter(t => t.player_id === player.id)
-                .sort((a, b) => a.turn_number - b.turn_number);
-            return {
-                player,
-                breakdown: computeATCNumberBreakdown(playerTurns, detectedOrder),
-            };
-        })
         : [];
 
     return (
@@ -143,8 +89,8 @@ export default function GameDetail() {
             )}
 
             {/* ATC: Number Breakdown per player */}
-            {isATC && hasTurns && (
-                <ATCBreakdownCharts atcBreakdowns={atcBreakdowns} />
+            {isATC && (
+                <ATCBreakdownCharts game={game} />
             )}
 
             {/* 501-only: Key Stats + Score Bands */}

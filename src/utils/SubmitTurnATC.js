@@ -2,9 +2,6 @@ import { processAroundTheClockTurn } from "./ATCLogic";
 
 export function submitTurnAroundTheClock(state) {
     const currentPlayer = state.players[state.currentPlayerIndex];
-    console.log("ATC submit — currentPlayer:", JSON.stringify(currentPlayer));
-    console.log("ATC submit — state.order:", state.order);
-    console.log("ATC submit — currentTurn:", JSON.stringify(state.currentTurn));
 
     // Always pad to 3 darts — unthrown darts count as misses
     const fullTurn = [...state.currentTurn];
@@ -19,6 +16,7 @@ export function submitTurnAroundTheClock(state) {
         winner: state.winner,
         turnNumber: state.turnNumber,
         turns: state.turns,
+        dartDetails: state.dartDetails,
         gameMode: state.gameMode,
         finishMultiplier: state.finishMultiplier,
         order: state.order,
@@ -33,10 +31,8 @@ export function submitTurnAroundTheClock(state) {
 
     const newDarts = { ...currentPlayer.darts };
     for (const dart of fullTurn) {
-        // Count ALL darts thrown (including misses) in total
-        // so that misses = total - singles - doubles - triples works correctly
         newDarts.total += 1;
-        if (dart.number === 0) continue; // miss dart — only counts toward total
+        if (dart.number === 0) continue;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;
@@ -59,6 +55,15 @@ export function submitTurnAroundTheClock(state) {
         triples: realDarts.filter(d => d.multiplier === 3).length,
     };
 
+    // Build dart details — one record per dart with exact number and multiplier
+    const newDartDetails = fullTurn.map((dart, i) => ({
+        player_id: currentPlayer.id,
+        turn_number: state.turnNumber,
+        dart_number: i + 1,
+        number: dart.number,
+        multiplier: dart.multiplier,
+    }));
+
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
     const winnerObj = win
         ? { id: currentPlayer.id, name: currentPlayer.name, finalPlayers: updatedPlayers }
@@ -73,5 +78,6 @@ export function submitTurnAroundTheClock(state) {
         turnHistory: [...state.turnHistory, snapshot],
         turnNumber: state.turnNumber + 1,
         turns: [...state.turns, turnData],
+        dartDetails: [...(state.dartDetails ?? []), ...newDartDetails],
     };
 }
