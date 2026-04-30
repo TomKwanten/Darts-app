@@ -14,7 +14,7 @@ function getRankColor(rank) {
 }
 
 function dartLabel(dart) {
-    if (dart.number === 0) return "Miss";
+    if (dart.number === 0 || dart.multiplier === 0) return "Miss";
     const prefix = dart.multiplier === 2 ? "D" : dart.multiplier === 3 ? "T" : "S";
     const num = dart.number === 25 ? "B" : dart.number;
     return `${prefix}${num}`;
@@ -67,16 +67,17 @@ export default function PlayerCard({ player, isActive, gameMode, currentTurn, pl
             <div className="flex gap-0.5 mb-1.5 px-0.5">
                 {[0, 1, 2].map((i) => {
                     const dart = isActive ? currentTurn[i] : null;
+                    const isMiss = dart && (dart.number === 0 || dart.multiplier === 0);
                     return (
                         <div
                             key={i}
                             className="flex-1 rounded-md text-center text-[11px] font-black uppercase tracking-wide py-[2px] transition-all duration-150 min-w-0"
                             style={{
                                 backgroundColor: dart
-                                    ? (dart.gepikt ? "#78350f" : "#1a4731")
+                                    ? (dart.gepikt ? "#78350f" : isMiss ? "#374151" : "#1a4731")
                                     : (isActive ? "#1f2937" : "transparent"),
                                 color: dart
-                                    ? (dart.gepikt ? "#fbbf24" : "#86efac")
+                                    ? (dart.gepikt ? "#fbbf24" : isMiss ? "#6b7280" : "#86efac")
                                     : "transparent",
                             }}>
                             {dart ? dartLabel(dart) : "·"}

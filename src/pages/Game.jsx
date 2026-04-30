@@ -83,7 +83,7 @@ export default function Game() {
         const isATC = gameMode === "around-the-clock" || gameMode === "around-the-clock-solo";
 
         const gameSummary = {
-            winner_id: winner.id,
+            winner_id: winner.isSolo ? null : winner.id,
             game_mode: gameMode,
             players: winner.finalPlayers.map(player => ({
                 id: player.id,

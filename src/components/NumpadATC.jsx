@@ -8,9 +8,9 @@ const MULTIPLIERS = [
     { label: "T", value: 3, full: "Triple" },
 ];
 
-export default function NumpadATC({ undoSubmit }) {
+export default function NumpadATC() {
     const { gameState, dispatch } = useContext(GameContext);
-    const { currentTurn, currentPlayerIndex, players } = gameState;
+    const { currentTurn, currentPlayerIndex, players, turnHistory } = gameState;
     const dartsThisTurn = currentTurn.length;
     const turnFull = dartsThisTurn >= 3;
 
@@ -24,7 +24,6 @@ export default function NumpadATC({ undoSubmit }) {
     const target = newTarget;
     const isBull = target === 25;
 
-    // Dart indicator — which dart we're on (1, 2, 3)
     const dartIndex = dartsThisTurn + 1;
 
     function handleDart(multiplier) {
@@ -37,7 +36,6 @@ export default function NumpadATC({ undoSubmit }) {
 
     function handleMiss() {
         if (turnFull) return;
-        // Miss on the current target number — not a generic 0
         dispatch({
             type: "ADD_DART_ATC",
             payload: { number: target, multiplier: 0 },
@@ -47,7 +45,7 @@ export default function NumpadATC({ undoSubmit }) {
     return (
         <div className="h-full flex flex-col rounded-2xl border border-gray-800 bg-gray-900 p-2 gap-2">
 
-            {/* Dart counter — shows which dart we're on */}
+            {/* Dart progress bar */}
             <div className="flex gap-1 px-1 pt-1">
                 {[1, 2, 3].map((d) => {
                     const thrown = d <= dartsThisTurn;
@@ -68,7 +66,7 @@ export default function NumpadATC({ undoSubmit }) {
                 })}
             </div>
 
-            {/* Big target display */}
+            {/* Target display */}
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 <div className="text-center">
                     <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-1">
@@ -80,7 +78,7 @@ export default function NumpadATC({ undoSubmit }) {
                     </div>
                 </div>
 
-                {/* S / D / T buttons — Bull has no triple */}
+                {/* S / D / T buttons */}
                 <div className="grid grid-cols-3 gap-3 w-full px-2">
                     {MULTIPLIERS.map((m) => {
                         const isBullTriple = isBull && m.value === 3;
@@ -116,7 +114,17 @@ export default function NumpadATC({ undoSubmit }) {
                 </button>
             </div>
 
-            {undoSubmit}
+            {/* Undo only — no submit for ATC (auto-submits after 3rd dart) */}
+            <div className="flex-shrink-0 pt-1">
+                <button
+                    onClick={() => dispatch({ type: "UNDO_DART" })}
+                    disabled={dartsThisTurn === 0 && turnHistory.length === 0}
+                    className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wider
+                               transition-all duration-150 active:scale-95 disabled:opacity-25"
+                    style={{ backgroundColor: "#1f2937", color: "#9ca3af" }}>
+                    Undo
+                </button>
+            </div>
         </div>
     );
 }

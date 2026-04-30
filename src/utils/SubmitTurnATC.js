@@ -20,6 +20,7 @@ export function submitTurnAroundTheClock(state) {
         gameMode: state.gameMode,
         finishMultiplier: state.finishMultiplier,
         order: state.order,
+        solo: state.solo,
         submittedTurn: fullTurn,
     };
 
@@ -32,13 +33,13 @@ export function submitTurnAroundTheClock(state) {
     const newDarts = { ...currentPlayer.darts };
     for (const dart of fullTurn) {
         newDarts.total += 1;
-        if (dart.number === 0) continue;
+        if (dart.number === 0 || dart.multiplier === 0) continue;
         if (dart.multiplier === 1) newDarts.singles += 1;
         if (dart.multiplier === 2) newDarts.doubles += 1;
         if (dart.multiplier === 3) newDarts.triples += 1;
     }
 
-    const realDarts = fullTurn.filter(d => d.number !== 0);
+    const realDarts = fullTurn.filter(d => d.number !== 0 && d.multiplier > 0);
 
     const updatedPlayers = state.players.map((player, index) => {
         if (index !== state.currentPlayerIndex) return player;
@@ -55,7 +56,6 @@ export function submitTurnAroundTheClock(state) {
         triples: realDarts.filter(d => d.multiplier === 3).length,
     };
 
-    // Build dart details — one record per dart with exact number and multiplier
     const newDartDetails = fullTurn.map((dart, i) => ({
         player_id: currentPlayer.id,
         turn_number: state.turnNumber,
@@ -65,9 +65,18 @@ export function submitTurnAroundTheClock(state) {
     }));
 
     const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-    const winnerObj = win
-        ? { id: currentPlayer.id, name: currentPlayer.name, finalPlayers: updatedPlayers }
-        : null;
+
+    // Solo: still trigger game end but mark as solo so it won't count as a competitive win
+    // Multiplayer: normal winner object
+    let winnerObj = null;
+    if (win) {
+        winnerObj = {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            finalPlayers: updatedPlayers,
+            isSolo: state.solo ?? false,
+        };
+    }
 
     return {
         ...state,

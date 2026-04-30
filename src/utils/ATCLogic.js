@@ -35,7 +35,8 @@ export function processAroundTheClockTurn(currentTarget, darts, order) {
     let target = currentTarget;
 
     for (const dart of darts) {
-        if (dart.number === target) {
+        // Only a real hit (multiplier > 0) advances the target
+        if (dart.number === target && dart.multiplier > 0) {
             const next = getNextTarget(target, order);
             if (next === null) {
                 // Was on Bull and hit it — win

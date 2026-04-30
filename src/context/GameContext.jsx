@@ -3,6 +3,7 @@ import { submitTurn501, bustTurn501 } from "../utils/SubmitTurn501.js";
 import { submitTurnCricket } from "../utils/submitTurnCricket";
 import { submitTurnAroundTheClock } from "../utils/SubmitTurnATC.js";
 import { submitTurnShanghai } from "../utils/SubmitTurnShanghai.js";
+import { processAroundTheClockTurn } from "../utils/ATCLogic.js";
 
 export const GameContext = createContext();
 
@@ -50,14 +51,18 @@ export default function GameProvider({ children }) {
             case "ADD_DART":
                 return { ...state, currentTurn: [...state.currentTurn, action.payload] };
 
-            // ATC-specific: add one dart, auto-submit after the 3rd
+            // ATC-specific: add one dart, auto-submit after the 3rd or immediately on win
             case "ADD_DART_ATC": {
                 const newTurn = [...state.currentTurn, action.payload];
-                if (newTurn.length < 3) {
-                    return { ...state, currentTurn: newTurn };
+                const { win } = processAroundTheClockTurn(
+                    state.players[state.currentPlayerIndex]?.currentTarget,
+                    newTurn,
+                    state.order
+                );
+                if (win || newTurn.length >= 3) {
+                    return submitTurnAroundTheClock({ ...state, currentTurn: newTurn });
                 }
-                // 3rd dart — auto-submit
-                return submitTurnAroundTheClock({ ...state, currentTurn: newTurn });
+                return { ...state, currentTurn: newTurn };
             }
 
             case "UNDO_DART": {

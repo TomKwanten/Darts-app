@@ -165,8 +165,9 @@ export function ATCBreakdownCharts({ game }) {
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
                                     <XAxis
                                         dataKey="number"
-                                        tick={{ fill: "#6b7280", fontSize: 9 }}
+                                        tick={{ fill: "#6b7280", fontSize: 8 }}
                                         tickFormatter={v => v === 25 ? "B" : v}
+                                        interval={0}
                                     />
                                     <YAxis
                                         allowDecimals={false}
